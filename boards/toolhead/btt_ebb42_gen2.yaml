@@ -1,0 +1,35 @@
+# BTT EBB42 Gen2 — referência: canbus.esoterical.online (Common Toolhead Hardware)
+nome: "BTT EBB42 Gen2"
+categoria: toolhead
+mcu: STM32G0B1
+bootloader:
+  metodo: dfu
+  vid_pid:
+    - "0483:df11"
+  instrucoes: "Conecte a placa à breakout, remova o jumper USB/CAN, alimente a breakout via USB, segure BOOT, toque RST, conte 5 e solte BOOT"
+katapult:
+  comum:
+    - "CONFIG_MCU_STM32G0B1=y"
+    - "CONFIG_CLOCK_FREQ_64M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"
+  usb:
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+klipper:
+  comum:
+    - "CONFIG_MCU_STM32G0B1=y"
+    - "CONFIG_CLOCK_FREQ_64M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"
+  usb:
+    - "CONFIG_USB=y"
+hardware:
+  resistor_120r: jumper
+  avisos:
+    - "A breakout não é adaptador USB-CAN — é preciso um U2C/UTOC ou mainboard em bridge"
+    - "Após o DFU, recoloque o jumper USB/CAN para operar em CAN"

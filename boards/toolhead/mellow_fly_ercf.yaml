@@ -1,0 +1,30 @@
+# Mellow Fly ERCF — referência: canbus.esoterical.online (Common Toolhead Hardware)
+nome: "Mellow Fly ERCF"
+categoria: toolhead
+mcu: RP2040
+bootloader:
+  metodo: bootsel
+  vid_pid:
+    - "2e8a:0003"
+  instrucoes: "Desconecte USB e CAN, segure BOOT, conecte o USB mantendo BOOT, aguarde e solte (lsusb mostra Pi RP2 Boot)"
+katapult:
+  comum:
+    - "CONFIG_MCU_RP2040=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_GPIO25_GPIO26=y"       # VALIDAR: pinos CAN do ERCF
+  usb:
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+klipper:
+  comum:
+    - "CONFIG_MCU_RP2040=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_GPIO25_GPIO26=y"       # VALIDAR: pinos CAN do ERCF
+  usb:
+    - "CONFIG_USB=y"
+hardware:
+  resistor_120r: permanente
+  avisos:
+    - "Confirme os pinos CAN no guia antes do primeiro flash"

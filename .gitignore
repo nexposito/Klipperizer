@@ -1,0 +1,6 @@
+# Clones locais e builds
+klipper/
+katapult/
+.venv/
+out/
+*.log

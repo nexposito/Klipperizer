@@ -1,0 +1,52 @@
+# ============================================================
+#  Klipperizer — Template de perfil de placa
+#  Copie para boards/<categoria>/<placa>.yaml e preencha.
+#  Referência de menuconfig por placa:
+#  https://canbus.esoterical.online
+#  IMPORTANTE: símbolos CONFIG_* inválidos são detectados no
+#  build (verificar_simbolos) — nada passa em silêncio.
+# ============================================================
+
+nome: "Nome da Placa vX.Y"        # exibido no menu
+categoria: toolhead               # toolhead | mainboard | adaptador
+mcu: STM32G0B1                    # chip real da placa
+
+# Opcional: placa com mais de uma variante de MCU (ex.: Octopus)
+# variantes:
+#   - mcu: STM32F446
+#     sufixo: "F446"
+#   - mcu: STM32H723
+#     sufixo: "H723"
+
+bootloader:
+  metodo: dfu                     # dfu | bootsel | sd
+  vid_pid:                        # IDs USB no modo DFU/BOOT (lsusb)
+    - "0483:df11"
+  instrucoes: "Passos exatos para entrar no modo DFU/BOOT"
+
+# Omita esta seção quando categoria: adaptador
+katapult:
+  comum:                          # opções comuns aos dois modos
+    - "CONFIG_MCU_STM32G0B1=y"
+    - "CONFIG_CLOCK_FREQ_64M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"   # offset do bootloader
+  can:                            # opções quando modo = can
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"
+  usb:                            # opções quando modo = usb
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"
+
+klipper:
+  comum: []
+  can: []
+  usb: []
+
+# Somente para categoria: adaptador (não roda Katapult/Klipper)
+# adaptador:
+#   firmware: "https://.../firmware.bin"
+#   comando: "dfu-util -d {vidpid} -a 0 -s 0x08000000:leave -D {arquivo}"
+
+hardware:
+  resistor_120r: jumper           # permanente | jumper | nenhum | externo
+  avisos: []                      # exibidos antes do flash

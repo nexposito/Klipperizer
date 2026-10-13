@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Klipperizer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>⚡ Klipperizer</h1>
+    <span id="status-badge" class="badge idle">Pronto</span>
+  </header>
+
+  <main>
+    <!-- Tela 1: seleção de placa -->
+    <section id="tela-placas" class="tela">
+      <div class="filtros">
+        <button class="filtro ativo" data-cat="">Todas</button>
+        <button class="filtro" data-cat="toolhead">Toolheads</button>
+        <button class="filtro" data-cat="mainboard">Mainboards</button>
+        <button class="filtro" data-cat="adaptador">Adaptadores</button>
+      </div>
+      <div id="grade-placas" class="grade"></div>
+    </section>
+
+    <!-- Tela 2: modo de comunicação -->
+    <section id="tela-modo" class="tela oculta">
+      <button class="voltar" onclick="voltarPlacas()">← Voltar</button>
+      <h2 id="nome-placa"></h2>
+      <div class="opcoes-modo">
+        <button class="modo-card" onclick="escolherModo('can')">
+          <span class="icone">📡</span>
+          <span class="titulo">CAN bus</span>
+          <span class="desc">Flash via rede CAN (Katapult)</span>
+        </button>
+        <button class="modo-card" onclick="escolherModo('usb')">
+          <span class="icone">🔌</span>
+          <span class="titulo">USB</span>
+          <span class="desc">Flash via cabo USB (Katapult)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Tela 3: execução -->
+    <section id="tela-execucao" class="tela oculta">
+      <h2 id="exec-titulo"></h2>
+      <div id="avisos" class="avisos oculta"></div>
+      <pre id="log">Aguardando início...</pre>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

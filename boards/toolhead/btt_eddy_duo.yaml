@@ -1,0 +1,31 @@
+# BTT Eddy Duo — referência: canbus.esoterical.online (Common Toolhead Hardware)
+nome: "BTT Eddy Duo"
+categoria: toolhead
+mcu: RP2040
+bootloader:
+  metodo: bootsel
+  vid_pid:
+    - "2e8a:0003"
+  instrucoes: "Mova a chave USB/CAN para USB, segure BOOT e conecte o cabo USB"
+katapult:
+  comum:
+    - "CONFIG_MCU_RP2040=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_GPIO20_GPIO21=y"       # VALIDAR: pinos CAN do Eddy
+  usb:
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+klipper:
+  comum:
+    - "CONFIG_MCU_RP2040=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_GPIO20_GPIO21=y"       # VALIDAR: pinos CAN do Eddy
+  usb:
+    - "CONFIG_USB=y"
+hardware:
+  resistor_120r: jumper
+  avisos:
+    - "Chave física USB/CAN — volte para CAN após o flash"
+    - "Confirme os pinos CAN no guia antes do primeiro flash"

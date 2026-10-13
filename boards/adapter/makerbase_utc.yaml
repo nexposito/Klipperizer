@@ -1,0 +1,24 @@
+# Makerbase UTC 1.0 — adaptador USB-CAN (não roda Katapult/Klipper)
+# Referência: canbus.esoterical.online (Common CAN Adapters)
+# ATENÇÃO: caso especial — de fábrica o nBOOT_SEL está bloqueado e o botão
+# BOOT não funciona. A recuperação exige um STLink (STM32CubeProgrammer):
+# 1. Conecte o STLink ao header SWD (pin1=SWDIO, pin2=3.3V, pin3=SWCLK, pin4=GND, pin5=Reset)
+# 2. No STM32CubeProgrammer, desmarque nBOOT_SEL nas Option Bytes e aplique
+# 3. Depois disso o modo DFU funciona normalmente
+nome: "Makerbase UTC 1.0"
+categoria: adaptador
+mcu: STM32G0B1
+bootloader:
+  metodo: dfu
+  vid_pid:
+    - "0483:df11"
+  instrucoes: "PRIMEIRA VEZ: recuperação via STLink (desbloquear nBOOT_SEL). Depois: segure BOOT ao conectar o USB"
+adaptador:
+  firmware: "https://github.com/marckleinebudde/candleLight_fw"
+  comando: "VALIDAR: o UTC usa CandleLight (build local) ou Klipper USB-CAN-Bridge — veja o guia"
+hardware:
+  resistor_120r: jumper
+  avisos:
+    - "De fábrica o nBOOT_SEL está bloqueado — a 1ª recuperação exige STLink"
+    - "Vem com Klipper USB-CAN-Bridge a 250k de fábrica — não dá para mudar o bitrate sem regravar"
+    - "Alternativa recomendada: firmware CandleLight (multichannel)"

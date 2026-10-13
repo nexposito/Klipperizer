@@ -1,0 +1,17 @@
+# Klipperizer — serviço do painel web (instalado pelo install.sh)
+# Instalação: sudo cp web/klipperizer-web.service /etc/systemd/system/
+#             sudo systemctl enable --now klipperizer-web
+[Unit]
+Description=Klipperizer painel web touch
+After=network.target
+
+[Service]
+Type=simple
+User=%i
+WorkingDirectory=/home/%i/klipperizer
+ExecStart=/home/%i/klipperizer/.venv/bin/python3 web/server.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

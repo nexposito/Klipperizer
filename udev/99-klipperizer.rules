@@ -1,0 +1,13 @@
+# Klipperizer — acesso a placas em modo DFU/BOOT e seriais CDC sem sudo
+
+# STM32 em DFU
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE="0664", GROUP="plugdev"
+
+# RP2040 em BOOTSEL
+SUBSYSTEM=="usb", ATTRS{idVendor}=="2e8a", ATTRS{idProduct}=="0003", MODE="0664", GROUP="plugdev"
+
+# Geehy APM32 em DFU (Mellow UTOC)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="314b", ATTRS{idProduct}=="0106", MODE="0664", GROUP="plugdev"
+
+# Katapult / Klipper via USB CDC (VID openmoko)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1d50", MODE="0664", GROUP="dialout"

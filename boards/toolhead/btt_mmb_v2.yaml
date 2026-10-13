@@ -1,0 +1,34 @@
+# BTT MMB CAN v2.0 — referência: canbus.esoterical.online (Common Toolhead Hardware)
+nome: "BTT MMB CAN v2.0"
+categoria: toolhead
+mcu: STM32G0B1
+bootloader:
+  metodo: dfu
+  vid_pid:
+    - "0483:df11"
+  instrucoes: "Coloque o jumper 5V, conecte o USB, segure Reset e BOOT, solte Reset e depois BOOT (lsusb deve mostrar 0483:df11)"
+katapult:
+  comum:
+    - "CONFIG_MCU_STM32G0B1=y"
+    - "CONFIG_CLOCK_FREQ_64M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"
+  usb:
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+klipper:
+  comum:
+    - "CONFIG_MCU_STM32G0B1=y"
+    - "CONFIG_CLOCK_FREQ_64M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"
+  usb:
+    - "CONFIG_USB=y"
+hardware:
+  resistor_120r: jumper
+  avisos:
+    - "Jumper 5V necessário para alimentar via USB no modo DFU"

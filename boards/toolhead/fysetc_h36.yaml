@@ -1,0 +1,37 @@
+# Fysetc H36 — referência: canbus.esoterical.online (Common Toolhead Hardware)
+# ATENÇÃO: o modo CAN exige "GPIO pins to set at micro-controller startup" = !PA2
+# no Katapult E no Klipper — adicione o símbolo correto após validar no guia.
+nome: "Fysetc H36"
+categoria: toolhead
+mcu: STM32F072
+bootloader:
+  metodo: dfu
+  vid_pid:
+    - "0483:df11"
+  instrucoes: "Conecte o USB, segure BOOT0, toque RESET, conte 5 e solte BOOT0"
+katapult:
+  comum:
+    - "CONFIG_MCU_STM32F072=y"
+    - "CONFIG_CLOCK_FREQ_48M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+  usb:
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+klipper:
+  comum:
+    - "CONFIG_MCU_STM32F072=y"
+    - "CONFIG_CLOCK_FREQ_48M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+  usb:
+    - "CONFIG_USB=y"
+hardware:
+  resistor_120r: permanente
+  avisos:
+    - "Modo CAN exige GPIO de startup !PA2 no Katapult e no Klipper"
+    - "120R habilitado de fábrica — cortar pads para desabilitar"

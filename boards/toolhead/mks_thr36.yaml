@@ -1,0 +1,31 @@
+# MKS THR36 V1.0 — referência: canbus.esoterical.online (Common Toolhead Hardware)
+nome: "MKS THR36 V1.0"
+categoria: toolhead
+mcu: RP2040
+bootloader:
+  metodo: bootsel
+  vid_pid:
+    - "2e8a:0003"
+  instrucoes: "Coloque o jumper 5V na posição 'on', conecte o USB, segure BOOT, toque RESET, aguarde e solte BOOT (lsusb mostra Pi RP2 Boot)"
+katapult:
+  comum:
+    - "CONFIG_MCU_RP2040=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_GPIO25_GPIO26=y"       # VALIDAR: pinos CAN do THR36
+  usb:
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+klipper:
+  comum:
+    - "CONFIG_MCU_RP2040=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_GPIO25_GPIO26=y"       # VALIDAR: pinos CAN do THR36
+  usb:
+    - "CONFIG_USB=y"
+hardware:
+  resistor_120r: permanente
+  avisos:
+    - "Jumper 5V necessário para alimentar via USB no modo BOOT"
+    - "Confirme os pinos CAN no guia antes do primeiro flash"

@@ -1,0 +1,36 @@
+# Fysetc Spider v2.2 — referência: canbus.esoterical.online (Common Mainboard Hardware)
+# ATENÇÃO: exige transceiver CAN externo (TJA1050) ligado ao PD0/PD1
+nome: "Fysetc Spider v2.2"
+categoria: mainboard
+mcu: STM32F446
+bootloader:
+  metodo: dfu
+  vid_pid:
+    - "0483:df11"
+  instrucoes: "VALIDAR no guia: sequência de DFU da Spider v2.2"
+katapult:
+  comum:
+    - "CONFIG_MCU_STM32F446=y"
+    - "CONFIG_CLOCK_FREQ_180M=y"
+    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PD0_PD1=y"             # VALIDAR: pinos PD0/PD1
+  usb:
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+klipper:
+  comum:
+    - "CONFIG_MCU_STM32F446=y"
+    - "CONFIG_CLOCK_FREQ_180M=y"
+    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PD0_PD1=y"             # VALIDAR: pinos PD0/PD1
+  usb:
+    - "CONFIG_USB=y"
+hardware:
+  resistor_120r: externo
+  avisos:
+    - "Exige transceiver CAN externo (TJA1050) no PD0/PD1 — sem ele não há CAN"
+    - "O resistor 120R fica no transceiver, não na placa"

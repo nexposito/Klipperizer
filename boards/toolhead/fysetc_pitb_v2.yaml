@@ -1,0 +1,36 @@
+# Fysetc PITB V2.0 — referência: canbus.esoterical.online (Common Toolhead Hardware)
+# ATENÇÃO: sem o jumper CAN a placa entra em CAN-FD (não suportado pelo Klipper)
+nome: "Fysetc PITB V2.0"
+categoria: toolhead
+mcu: STM32F072
+bootloader:
+  metodo: dfu
+  vid_pid:
+    - "0483:df11"
+  instrucoes: "Desconecte o cabo CAN, conecte o USB, segure BT0, toque RST, conte 5 e solte BT0"
+katapult:
+  comum:
+    - "CONFIG_MCU_STM32F072=y"
+    - "CONFIG_CLOCK_FREQ_48M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+  usb:
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+klipper:
+  comum:
+    - "CONFIG_MCU_STM32F072=y"
+    - "CONFIG_CLOCK_FREQ_48M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+  usb:
+    - "CONFIG_USB=y"
+hardware:
+  resistor_120r: permanente
+  avisos:
+    - "Jumper CAN obrigatório — sem ele a placa entra em CAN-FD (não suportado)"
+    - "120R permanente — não removível"

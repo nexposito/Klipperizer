@@ -1,0 +1,32 @@
+# BTT SKR Pico — referência: canbus.esoterical.online (Common Mainboard Hardware)
+# ATENÇÃO: exige transceiver CAN externo (TJA1050) ligado ao IO0/IO1
+nome: "BTT SKR Pico"
+categoria: mainboard
+mcu: RP2040
+bootloader:
+  metodo: bootsel
+  vid_pid:
+    - "2e8a:0003"
+  instrucoes: "VALIDAR no guia: sequência de BOOTSEL da SKR Pico"
+katapult:
+  comum:
+    - "CONFIG_MCU_RP2040=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_GPIO25_GPIO26=y"       # VALIDAR: pinos TX/RX (IO0/IO1)
+  usb:
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+klipper:
+  comum:
+    - "CONFIG_MCU_RP2040=y"
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_GPIO25_GPIO26=y"       # VALIDAR: pinos TX/RX (IO0/IO1)
+  usb:
+    - "CONFIG_USB=y"
+hardware:
+  resistor_120r: externo
+  avisos:
+    - "Exige transceiver CAN externo (TJA1050) no IO0/IO1 — sem ele não há CAN"
+    - "O resistor 120R fica no transceiver, não na placa"

@@ -1,0 +1,36 @@
+# Fysetc SB-CAN-TH — referência: canbus.esoterical.online (Common Toolhead Hardware)
+# v1.1 entra em DFU sozinha ao ligar; v1.3 exige segurar reset por 2s
+nome: "Fysetc SB-CAN-TH"
+categoria: toolhead
+mcu: STM32F072
+bootloader:
+  metodo: dfu
+  vid_pid:
+    - "0483:df11"
+  instrucoes: "v1.1: desligue tudo, conecte o USB e ligue (entra em DFU sozinha). v1.3: ligue, aguarde o boot, segure o botão reset por 2 segundos"
+katapult:
+  comum:
+    - "CONFIG_MCU_STM32F072=y"
+    - "CONFIG_CLOCK_FREQ_48M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+  usb:
+    - "CONFIG_USB=y"
+    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+klipper:
+  comum:
+    - "CONFIG_MCU_STM32F072=y"
+    - "CONFIG_CLOCK_FREQ_48M=y"
+    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  can:
+    - "CONFIG_CAN_BUS=y"
+    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+  usb:
+    - "CONFIG_USB=y"
+hardware:
+  resistor_120r: nenhum
+  avisos:
+    - "v1.1 não tem resistor 120R nem provisions; v1.3 tem header 120R"
+    - "Após o flash, desligue tudo, remova o USB e conecte o CAN antes de ligar"

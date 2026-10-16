@@ -7,7 +7,7 @@ Escolha a placa no menu, escolha a comunicação e o Klipperizer faz o resto: ge
 ## Instalação
 
 ```bash
-git clone https://github.com/SEU_USUARIO/Klipperizer.git
+git clone https://github.com/nexposito/Klipperizer
 cd Klipperizer
 bash install.sh
 ```

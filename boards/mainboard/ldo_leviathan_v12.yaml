@@ -1,35 +1,38 @@
-# LDO Leviathan v1.2 — referência: canbus.esoterical.online (Common Mainboard Hardware)
-# VALIDAR: MCU, modo de boot, offset e pinos na página da placa no guia
-nome: "LDO Leviathan v1.2"
-categoria: mainboard
+# LDO Leviathan v1.2 — reference: canbus.esoterical.online (Common Mainboard Hardware)
+# VERIFY: MCU, boot method, offset and pins on the board page in the guide
+name: "LDO Leviathan v1.2"
+category: mainboard
 mcu: STM32H723
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "VALIDAR no guia: sequência de DFU da Leviathan v1.2"
+  instructions: "VERIFY in the guide: Leviathan v1.2 DFU sequence"
+# H723: 128KiB Katapult offset, 25 MHz crystal (VERIFY) and FDCAN pins (VERIFY)
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32H723=y"
-    - "CONFIG_CLOCK_FREQ_550M=y"             # VALIDAR: clock no guia
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32H723=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_CLOCK_REF_25M=y"   # VERIFY crystal
+    - "CONFIG_STM32_FLASH_START_20000=y"
+    - "CONFIG_STM32_APP_START_20000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_MMENU_CANBUS_PB5_PB6=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32H723=y"
-    - "CONFIG_CLOCK_FREQ_550M=y"             # VALIDAR: clock no guia
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32H723=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_CLOCK_REF_25M=y"   # VERIFY crystal
+    - "CONFIG_STM32_FLASH_START_20000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_MMENU_CANBUS_PB5_PB6=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
   resistor_120r: jumper
-  avisos:
-    - "Perfil gerado por padrão — valide MCU, clock, offset e pinos na página da placa"
+  warnings:
+    - "Default-generated profile — VERIFY MCU, clock, offset and pins on the board page"

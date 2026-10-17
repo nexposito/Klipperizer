@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Klipperizer — menu principal e orquestração
-#  Flash automatizado de firmware Klipper (CAN/USB)
+#  Klipperizer — main menu and orchestration
+#  Automated Klipper firmware flashing (CAN/USB)
 #
-#  Uso:
-#    klipperizer                 → menu interativo (whiptail)
-#    klipperizer --list          → lista placas em JSON (usado pela web)
-#    klipperizer --flash <arquivo.yaml> <can|usb>  → flash direto
+#  Usage:
+#    ./klipperizer                     → interactive menu (whiptail)
+#    ./klipperizer --list              → list boards as JSON
+#    ./klipperizer --flash <file.yaml> <can|usb>  → direct flash
 # ============================================================
 set -euo pipefail
 
@@ -21,82 +21,96 @@ source "$BASEDIR/lib/flash.sh"
 KLIPPER_DIR="$BASEDIR/klipper"
 KATAPULT_DIR="$BASEDIR/katapult"
 
-need() { command -v "$1" >/dev/null 2>&1 || { echo "Faltando: $1 — rode: bash install.sh"; exit 1; }; }
+need() { command -v "$1" >/dev/null 2>&1 || { echo "Missing: $1 — run: bash install.sh"; exit 1; }; }
 for c in yq make git python3; do need "$c"; done
 
-# ---------- Primeira execução: clona as fontes ----------
+# ---------- First run: clone sources if missing ----------
 if [ ! -d "$KLIPPER_DIR" ]; then
-  aviso "Primeira execução: clonando o Klipper (pode demorar)..."
+  warn "First run: cloning Klipper (may take a while)..."
   git clone --depth 1 https://github.com/Klipper3d/klipper "$KLIPPER_DIR"
 fi
 if [ ! -d "$KATAPULT_DIR" ]; then
-  aviso "Clonando o Katapult..."
+  warn "Cloning Katapult..."
   git clone --depth 1 https://github.com/Arksine/katapult "$KATAPULT_DIR"
 fi
 
-listar_placas() {
-  # Saída: JSON [{arquivo, nome, categoria}] — consumido pela interface web
-  local primeiro=1
+list_boards() {
+  # Output: JSON [{file, name, category}]
+  local first=1
   echo "["
   while IFS= read -r f; do
-    local nome cat
-    nome=$(yq eval '.nome' "$f" 2>/dev/null || echo "")
-    cat=$(yq eval '.categoria' "$f" 2>/dev/null || echo "")
-    [ -z "$nome" ] || [ "$nome" = "null" ] && continue
-    [ $primeiro -eq 1 ] && primeiro=0 || echo ","
-    printf '{"arquivo": "%s", "nome": "%s", "categoria": "%s"}' \
-      "${f#$BASEDIR/}" "$nome" "$cat"
+    local name cat
+    name=$(yq eval '.name' "$f" 2>/dev/null || echo "")
+    cat=$(yq eval '.category' "$f" 2>/dev/null || echo "")
+    [ -z "$name" ] || [ "$name" = "null" ] && continue
+    [ $first -eq 1 ] && first=0 || echo ","
+    printf '{"file": "%s", "name": "%s", "category": "%s"}' \
+      "${f#$BASEDIR/}" "$name" "$cat"
   done < <(find "$BASEDIR/boards" -name '*.yaml' | sort)
   echo
   echo "]"
 }
 
-executar_flash() {
-  local perfil="$1" modo="$2"
-  case "$modo" in can|usb) ;; *) erro_fatal "Modo inválido: $modo (use can ou usb)" ;; esac
-  [ -f "$perfil" ] || erro_fatal "Perfil não encontrado: $perfil"
+run_flash() {
+  local profile="$1" mode="$2"
+  case "$mode" in can|usb) ;; *) fatal "Invalid mode: $mode (use can or usb)" ;; esac
+  [ -f "$profile" ] || fatal "Profile not found: $profile"
 
-  # Avisos de hardware do perfil (exibidos antes de qualquer ação)
-  while IFS= read -r a; do
-    [ -n "$a" ] && [ "$a" != "null" ] && aviso "$a"
-  done < <(yq eval '.hardware.avisos[]' "$perfil" 2>/dev/null)
+  # Hardware warnings from the profile (shown before any action)
+  while IFS= read -r w; do
+    [ -n "$w" ] && [ "$w" != "null" ] && warn "$w"
+  done < <(yq eval '.hardware.warnings[]' "$profile" 2>/dev/null)
 
-  compilar "$perfil" "$modo" "$KLIPPER_DIR" "$KATAPULT_DIR"
-  flashear  "$perfil" "$modo" "$KLIPPER_DIR" "$KATAPULT_DIR"
-  sucesso "Processo finalizado."
+  build_firmware "$profile" "$mode" "$KLIPPER_DIR" "$KATAPULT_DIR"
+  flash_board  "$profile" "$mode" "$KLIPPER_DIR" "$KATAPULT_DIR"
+  success "Process finished."
 }
 
-# ---------- Modos não interativos (usados pela interface web) ----------
+# ---------- Non-interactive modes ----------
 case "${1:-}" in
   --list)
-    listar_placas
+    list_boards
     exit 0
     ;;
   --flash)
-    [ $# -eq 3 ] || { echo "Uso: klipperizer --flash <perfil.yaml> <can|usb>" >&2; exit 1; }
-    executar_flash "$2" "$3"
+    [ $# -eq 3 ] || { echo "Usage: ./klipperizer --flash <profile.yaml> <can|usb>" >&2; exit 1; }
+    run_flash "$2" "$3"
     exit 0
     ;;
 esac
 
-# ---------- Menu interativo ----------
+# ---------- Interactive menu ----------
 need whiptail
 
 mapfile -t ARQS < <(find "$BASEDIR/boards" -name '*.yaml' | sort)
-[ ${#ARQS[@]} -gt 0 ] || { echo "Nenhum perfil em boards/. Copie schema/boards.template.yaml."; exit 1; }
+[ ${#ARQS[@]} -gt 0 ] || { echo "No profiles in boards/. Copy schema/boards.template.yaml."; exit 1; }
 
-MENU=()
+# Menu shows board names only (no file paths)
+NAMES=()
 for f in "${ARQS[@]}"; do
-  MENU+=("$f" "$(yq eval '.nome' "$f")")
+  NAMES+=("$(yq eval '.name' "$f")")
+done
+MENU=()
+for n in "${NAMES[@]}"; do
+  MENU+=("$n" "")
 done
 
-PERFIL=$(whiptail --backtitle "Klipperizer" --title "Seleção de placa" \
-  --menu "Escolha a placa a ser flasheada:" 0 0 0 "${MENU[@]}" \
+SELECTED=$(whiptail --backtitle "Klipperizer" --title "Board selection" \
+  --menu "Choose the board to flash:" 0 0 0 "${MENU[@]}" \
   3>&1 1>&2 2>&3) || exit 0
 
-MODO=$(whiptail --backtitle "Klipperizer" --title "Comunicação" \
-  --menu "Como a placa '$(yq eval '.nome' "$PERFIL")' vai se comunicar?" 0 0 0 \
+PROFILE=""
+for i in "${!NAMES[@]}"; do
+  if [ "${NAMES[$i]}" = "$SELECTED" ]; then
+    PROFILE="${ARQS[$i]}"
+    break
+  fi
+done
+[ -n "$PROFILE" ] || { echo "Board not found: $SELECTED"; exit 1; }
+
+MODE=$(whiptail --backtitle "Klipperizer" --title "Communication" \
+  --menu "How will the board '$(yq eval '.name' "$PROFILE")' communicate?" 0 0 0 \
   can "CAN bus" usb "USB (serial)" \
   3>&1 1>&2 2>&3) || exit 0
 
-executar_flash "$PERFIL" "$MODO"
+run_flash "$PROFILE" "$MODE"

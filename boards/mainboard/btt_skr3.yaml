@@ -1,34 +1,37 @@
-# BTT SKR-3 — referência: canbus.esoterical.online (Common Mainboard Hardware)
-nome: "BTT SKR-3"
-categoria: mainboard
+# BTT SKR-3 — reference: canbus.esoterical.online (Common Mainboard Hardware)
+name: "BTT SKR-3"
+category: mainboard
 mcu: STM32H723
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "VALIDAR no guia: sequência de DFU da SKR-3"
+  instructions: "VERIFY in the guide: SKR-3 DFU sequence"
+# H723: 128KiB Katapult offset, 25 MHz crystal (verified for SKR-3 EZ family) and FDCAN pins (VERIFY)
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32H723=y"
-    - "CONFIG_CLOCK_FREQ_550M=y"             # VALIDAR: clock no guia
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32H723=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_CLOCK_REF_25M=y"
+    - "CONFIG_STM32_FLASH_START_20000=y"
+    - "CONFIG_STM32_APP_START_20000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_MMENU_CANBUS_PB5_PB6=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32H723=y"
-    - "CONFIG_CLOCK_FREQ_550M=y"             # VALIDAR: clock no guia
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32H723=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_CLOCK_REF_25M=y"
+    - "CONFIG_STM32_FLASH_START_20000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_MMENU_CANBUS_PB5_PB6=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
-  resistor_120r: permanente
-  avisos:
-    - "Perfil gerado por padrão — valide MCU, clock, offset e pinos na página da placa"
+  resistor_120r: permanent
+  warnings:
+    - "Default-generated profile — VERIFY MCU, clock, offset and pins on the board page"

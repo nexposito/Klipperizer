@@ -1,36 +1,34 @@
-# Fysetc PITB V2.0 — referência: canbus.esoterical.online (Common Toolhead Hardware)
-# ATENÇÃO: sem o jumper CAN a placa entra em CAN-FD (não suportado pelo Klipper)
-nome: "Fysetc PITB V2.0"
-categoria: toolhead
+# Fysetc PITB V2.0 — reference: canbus.esoterical.online (Common Toolhead Hardware)
+# NOTE: without the CAN jumper the board enters CAN-FD (not supported by Klipper)
+name: "Fysetc PITB V2.0"
+category: toolhead
 mcu: STM32F072
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Desconecte o cabo CAN, conecte o USB, segure BT0, toque RST, conte 5 e solte BT0"
+  instructions: "Disconnect the CAN cable, connect USB, hold BT0, tap RST, count 5 and release BT0"
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
-  resistor_120r: permanente
-  avisos:
-    - "Jumper CAN obrigatório — sem ele a placa entra em CAN-FD (não suportado)"
-    - "120R permanente — não removível"
+  resistor_120r: permanent
+  warnings:
+    - "CAN jumper mandatory — without it the board enters CAN-FD (unsupported)"
+    - "120R permanent — not removable"

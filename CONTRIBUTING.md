@@ -1,53 +1,52 @@
-# Contribuindo com o Klipperizer
+# Contributing to Klipperizer
 
-Obrigado por querer adicionar uma placa! O processo é simples e a CI valida tudo automaticamente.
+Thanks for wanting to add a board! The process is simple and CI validates everything automatically.
 
-## Adicionando uma nova placa
+## Adding a new board
 
-1. **Copie o template**:
+1. **Copy the template**:
    ```bash
-   cp schema/boards.template.yaml boards/toolhead/minha_placa.yaml
+   cp schema/boards.template.yaml boards/toolhead/my_board.yaml
    ```
-   (use `mainboard/` ou `adapter/` conforme a categoria)
+   (use `mainboard/` or `adapter/` as appropriate)
 
-2. **Preencha os campos** — a referência principal é o guia
-   [canbus.esoterical.online](https://canbus.esoterical.online), que tem os
-   screenshots de menuconfig de cada placa:
-   - `nome` e `categoria`: exatamente como no guia
-   - `mcu`: chip real da placa (confira no silkscreen ou no manual)
-   - `bootloader.vid_pid`: rode `lsusb` com a placa em modo DFU/BOOT
-   - `bootloader.instrucoes`: copie os passos do guia
-   - `katapult` e `klipper`: transcreva as opções dos screenshots
-     (alternativa: use `python3 tools/extract_board_configs.py --board "Nome"`)
+2. **Fill in the fields** — the main reference is the
+   [canbus.esoterical.online](https://canbus.esoterical.online) guide, which has
+   menuconfig screenshots for every board:
+   - `name` and `category`: exactly as in the guide
+   - `mcu`: the board's real chip (check the silkscreen or the manual)
+   - `bootloader.vid_pid`: run `lsusb` with the board in DFU/BOOT mode
+   - `bootloader.instructions`: copy the steps from the guide
+   - `katapult` and `klipper`: transcribe the options from the screenshots
+     (alternative: use `python3 tools/extract_board_configs.py --board "Name"`)
 
-3. **Marque incertezas**: qualquer valor que você não tenha confirmado
-   com uma placa real, deixe o comentário `# VALIDAR` na linha. Isso ajuda
-   outros usuários a saberem o que conferir.
+3. **Mark uncertainties**: any value you have not confirmed with a real board,
+   leave a `# VERIFY` comment on the line. This helps other users know what to check.
 
-4. **Abra um Pull Request** — a CI valida o YAML (nome e VID:PID obrigatórios)
-   e roda shellcheck nos scripts.
+4. **Open a Pull Request** — CI validates the YAML (name and VID:PID required)
+   and runs shellcheck on the scripts.
 
-## Regras importantes
+## Important rules
 
-- **Símbolos CONFIG_* inválidos não passam em silêncio**: o build valida cada
-  símbolo contra o Kconfig real e falha com mensagem clara. Mesmo assim,
-  valide offsets e pinos com uma placa real quando possível.
-- **Adaptadores USB-CAN** (U2C, UTOC, UTC) não rodam Katapult/Klipper —
-  use a seção `adaptador` com `firmware` (URL do binário) e `comando`
-  (dfu-util com `{vidpid}` e `{arquivo}`).
-- **Placas com variantes de MCU** (Octopus, SKR-3 EZ): crie um perfil por
-  variante, com o sufixo no nome.
-- **Teste antes de aprovar**: se você testou o perfil com uma placa real,
-  remova os `# VALIDAR` e mencione no PR.
+- **Invalid CONFIG_* symbols never pass silently**: the build validates every
+  symbol against the real Kconfig and fails with a clear message. Even so,
+  validate offsets and pins with a real board when possible.
+- **USB-CAN adapters** (U2C, UTOC, UTC) do not run Katapult/Klipper —
+  use the `adapter` section with `firmware` (binary URL) and `command`
+  (dfu-util with `{vidpid}` and `{file}`).
+- **Boards with MCU variants** (Octopus, SKR-3 EZ): create one profile per
+  variant, with the suffix in the name.
+- **Test before approving**: if you tested the profile with a real board,
+  remove the `# VERIFY` comments and mention it in the PR.
 
-## Reportando problemas
+## Reporting issues
 
-Abra uma issue com:
-- Placa e variante de MCU
-- Modo (CAN/USB) e etapa em que falhou
-- Saída completa do log
-- Saída de `lsusb` e `ls /dev/serial/by-id/` no momento da falha
+Open an issue with:
+- Board and MCU variant
+- Mode (CAN/USB) and the step where it failed
+- Full log output
+- `lsusb` and `ls /dev/serial/by-id/` output at the moment of the failure
 
-## Licença
+## License
 
-Toda contribuição é licenciada sob GPL-3.0 junto com o projeto.
+Every contribution is licensed under GPL-3.0 along with the project.

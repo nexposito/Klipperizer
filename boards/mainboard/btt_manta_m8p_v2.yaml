@@ -1,34 +1,32 @@
-# BTT Manta M8P V2.0 — referência: canbus.esoterical.online (Common Mainboard Hardware)
-nome: "BTT Manta M8P V2.0"
-categoria: mainboard
+# BTT Manta M8P V2.0 — reference: canbus.esoterical.online (Common Mainboard Hardware)
+name: "BTT Manta M8P V2.0"
+category: mainboard
 mcu: STM32G0B1
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Segure BOOT0, toque RESET, conte 5 e solte BOOT0"
+  instructions: "Hold BOOT0, tap RESET, count 5 and release BOOT0"
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32G0B1=y"
-    - "CONFIG_CLOCK_FREQ_64M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32G0B1=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32G0B1=y"
-    - "CONFIG_CLOCK_FREQ_64M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32G0B1=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
   resistor_120r: jumper
-  avisos:
-    - "Porta CAN em conector JST-XH"
+  warnings:
+    - "CAN port on JST-XH connector"

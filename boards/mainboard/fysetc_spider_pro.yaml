@@ -1,35 +1,38 @@
-# Fysetc Spider Pro — referência: canbus.esoterical.online (Common Mainboard Hardware)
-nome: "Fysetc Spider Pro"
-categoria: mainboard
+# Fysetc Spider Pro — reference: canbus.esoterical.online (Common Mainboard Hardware)
+name: "Fysetc Spider Pro"
+category: mainboard
 mcu: STM32H723
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Segure BOOT0, toque RST, conte 5 e solte BOOT0"
+  instructions: "Hold BOOT0, tap RST, count 5 and release BOOT0"
+# H723: 128KiB Katapult offset, 25 MHz crystal (VERIFY) and FDCAN pins (VERIFY)
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32H723=y"
-    - "CONFIG_CLOCK_FREQ_550M=y"             # VALIDAR: clock no guia
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32H723=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_CLOCK_REF_25M=y"   # VERIFY crystal
+    - "CONFIG_STM32_FLASH_START_20000=y"
+    - "CONFIG_STM32_APP_START_20000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_MMENU_CANBUS_PB5_PB6=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32H723=y"
-    - "CONFIG_CLOCK_FREQ_550M=y"             # VALIDAR: clock no guia
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32H723=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_CLOCK_REF_25M=y"   # VERIFY crystal
+    - "CONFIG_STM32_FLASH_START_20000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_MMENU_CANBUS_PB5_PB6=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
   resistor_120r: jumper
-  avisos:
-    - "Porta CAN em conector JST-XH"
-    - "Confirme MCU, clock, offset e pinos no guia antes do primeiro flash"
+  warnings:
+    - "CAN port on JST-XH connector"
+    - "VERIFY MCU, clock, offset and pins against the guide before the first flash"

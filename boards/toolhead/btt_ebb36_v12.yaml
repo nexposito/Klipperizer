@@ -1,39 +1,35 @@
-# BTT EBB36 V1.2 — referência: canbus.esoterical.online (Common Toolhead Hardware)
-nome: "BTT EBB36 V1.2"
-categoria: toolhead
+# BTT EBB36 V1.2 — symbols and pins verified against the official BTT EBB README
+name: "BTT EBB36 V1.2"
+category: toolhead
 mcu: STM32G0B1
-
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Coloque o jumper 5V, conecte o USB, segure RESET e BOOT, solte RESET e depois BOOT (lsusb deve mostrar 0483:df11)"
-
+  instructions: "Set the 5V jumper, connect USB, hold RESET and BOOT, release RESET then BOOT (lsusb must show 0483:df11)"
+# CAN on PB0/PB1 requires low-level options; clock reference defaults to the 8 MHz crystal (matches the board)
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32G0B1=y"
-    - "CONFIG_CLOCK_FREQ_64M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: 8KiB bootloader
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32G0B1=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
+    - "CONFIG_STM32_MMENU_CANBUS_PB0_PB1=y"
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR: símbolo do Katapult
-
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32G0B1=y"
-    - "CONFIG_CLOCK_FREQ_64M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: 8KiB bootloader
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32G0B1=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
+    - "CONFIG_STM32_MMENU_CANBUS_PB0_PB1=y"
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_PA11_PA12=y"               # VALIDAR
-
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
   resistor_120r: jumper
-  avisos:
-    - "Jumper 5V necessário para alimentar a placa via USB no modo DFU"
+  warnings:
+    - "5V jumper required to power the board via USB in DFU mode"

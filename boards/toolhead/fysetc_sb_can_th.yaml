@@ -1,36 +1,34 @@
-# Fysetc SB-CAN-TH — referência: canbus.esoterical.online (Common Toolhead Hardware)
-# v1.1 entra em DFU sozinha ao ligar; v1.3 exige segurar reset por 2s
-nome: "Fysetc SB-CAN-TH"
-categoria: toolhead
+# Fysetc SB-CAN-TH — reference: canbus.esoterical.online (Common Toolhead Hardware)
+# v1.1 enters DFU by itself when powered; v1.3 requires holding reset for 2s
+name: "Fysetc SB-CAN-TH"
+category: toolhead
 mcu: STM32F072
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "v1.1: desligue tudo, conecte o USB e ligue (entra em DFU sozinha). v1.3: ligue, aguarde o boot, segure o botão reset por 2 segundos"
+  instructions: "v1.1: power everything off, connect USB and power on (enters DFU by itself). v1.3: power on, wait for boot, hold the reset button for 2 seconds"
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
-  resistor_120r: nenhum
-  avisos:
-    - "v1.1 não tem resistor 120R nem provisions; v1.3 tem header 120R"
-    - "Após o flash, desligue tudo, remova o USB e conecte o CAN antes de ligar"
+  resistor_120r: none
+  warnings:
+    - "v1.1 has no 120R resistor or provisions; v1.3 has a 120R header"
+    - "After flashing, power everything off, remove USB and connect CAN before powering on"

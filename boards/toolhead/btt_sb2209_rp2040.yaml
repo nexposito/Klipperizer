@@ -1,34 +1,35 @@
-# BTT SB2209 (RP2040) — referência: canbus.esoterical.online (Common Toolhead Hardware)
-nome: "BTT SB2209 (RP2040)"
-categoria: toolhead
+# BTT SB2209 (RP2040) — reference: canbus.esoterical.online (Common Toolhead Hardware)
+name: "BTT SB2209 (RP2040)"
+category: toolhead
 mcu: RP2040
-
 bootloader:
-  metodo: bootsel
+  method: bootsel
   vid_pid:
     - "2e8a:0003"
-  instrucoes: "Coloque o jumper 5V, segure o botão BOOT e conecte o USB (lsusb deve mostrar 2e8a:0003 - Pi RP2 Boot)"
-
+  instructions: "Set the 5V jumper, hold the BOOT button and connect the USB cable (lsusb must show 2e8a:0003 - Pi RP2 Boot)"
 katapult:
-  comum:
-    - "CONFIG_MCU_RP2040=y"
+  common:
+    - "CONFIG_MACH_RPXXXX=y"
+    - "CONFIG_MACH_RP2040=y"
+    - "CONFIG_RPXXXX_FLASH_START_4000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_GPIO25_GPIO26=y"       # VALIDAR: pinos CAN do SB2209
+    - "CONFIG_RPXXXX_CANBUS=y"
+    - "CONFIG_RPXXXX_CANBUS_GPIO_RX=25"   # VERIFY pins
+    - "CONFIG_RPXXXX_CANBUS_GPIO_TX=26"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR: símbolo do Katapult
-
+    - "CONFIG_RPXXXX_USB=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_RP2040=y"
+  common:
+    - "CONFIG_MACH_RPXXXX=y"
+    - "CONFIG_MACH_RP2040=y"
+    - "CONFIG_RPXXXX_FLASH_START_4000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_GPIO25_GPIO26=y"       # VALIDAR: pinos CAN do SB2209
+    - "CONFIG_RPXXXX_CANBUS=y"
+    - "CONFIG_RPXXXX_CANBUS_GPIO_RX=25"   # VERIFY pins
+    - "CONFIG_RPXXXX_CANBUS_GPIO_TX=26"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-
+    - "CONFIG_RPXXXX_USB=y"
 hardware:
   resistor_120r: jumper
-  avisos:
-    - "Jumper 5V necessário para alimentar via USB no modo BOOTSEL"
+  warnings:
+    - "5V jumper required to power via USB in BOOTSEL mode"

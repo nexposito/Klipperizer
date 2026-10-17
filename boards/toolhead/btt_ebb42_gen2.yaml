@@ -1,35 +1,36 @@
-# BTT EBB42 Gen2 — referência: canbus.esoterical.online (Common Toolhead Hardware)
-nome: "BTT EBB42 Gen2"
-categoria: toolhead
+# BTT EBB42 Gen2 — reference: canbus.esoterical.online (Common Toolhead Hardware)
+name: "BTT EBB42 Gen2"
+category: toolhead
 mcu: STM32G0B1
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Conecte a placa à breakout, remova o jumper USB/CAN, alimente a breakout via USB, segure BOOT, toque RST, conte 5 e solte BOOT"
+  instructions: "Connect the board to the breakout, remove the USB/CAN jumper, power the breakout via USB, hold BOOT, tap RST, count 5 and release BOOT"
+# CAN on PB0/PB1 requires low-level options (same family as EBB36 V1.2 — VERIFY)
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32G0B1=y"
-    - "CONFIG_CLOCK_FREQ_64M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32G0B1=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
+    - "CONFIG_STM32_MMENU_CANBUS_PB0_PB1=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32G0B1=y"
-    - "CONFIG_CLOCK_FREQ_64M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32G0B1=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
+    - "CONFIG_STM32_MMENU_CANBUS_PB0_PB1=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
   resistor_120r: jumper
-  avisos:
-    - "A breakout não é adaptador USB-CAN — é preciso um U2C/UTOC ou mainboard em bridge"
-    - "Após o DFU, recoloque o jumper USB/CAN para operar em CAN"
+  warnings:
+    - "The breakout is not a USB-CAN adapter — you need a U2C/UTOC or a mainboard in bridge mode"
+    - "After DFU, put the USB/CAN jumper back for CAN operation"

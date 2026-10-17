@@ -1,34 +1,32 @@
-# BTT Octopus (STM32F407) — referência: canbus.esoterical.online (Common Mainboard Hardware)
-nome: "BTT Octopus (STM32F407)"
-categoria: mainboard
+# BTT Octopus (STM32F407) — reference: canbus.esoterical.online (Common Mainboard Hardware)
+name: "BTT Octopus (STM32F407)"
+category: mainboard
 mcu: STM32F407
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Coloque o jumper BOOT e pressione o botão RESET (a placa pode estar alimentada por 24V ou pelo jumper USB power)"
+  instructions: "Set the BOOT jumper and press the RESET button (the board can be powered by 24V or the USB power jumper)"
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32F407=y"
-    - "CONFIG_CLOCK_FREQ_180M=y"
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F407=y"
+    - "CONFIG_STM32_FLASH_START_8000=y"
+    - "CONFIG_STM32_APP_START_8000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # porta CAN no RJ12 (v1/v1.1)
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # CAN port on RJ12 (v1/v1.1)
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32F407=y"
-    - "CONFIG_CLOCK_FREQ_180M=y"
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F407=y"
+    - "CONFIG_STM32_FLASH_START_8000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
-  resistor_120r: permanente
-  avisos:
-    - "A Octopus tem 4 variantes de MCU — confira o chip antes de flashear"
+  resistor_120r: permanent
+  warnings:
+    - "The Octopus has 4 MCU variants — check the chip before flashing"

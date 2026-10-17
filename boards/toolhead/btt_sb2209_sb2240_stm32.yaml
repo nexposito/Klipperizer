@@ -1,34 +1,32 @@
-# BTT SB2209/SB2240 (STM32) — referência: canbus.esoterical.online (Common Toolhead Hardware)
-nome: "BTT SB2209/SB2240 (STM32)"
-categoria: toolhead
+# BTT SB2209/SB2240 (STM32) — reference: canbus.esoterical.online (Common Toolhead Hardware)
+name: "BTT SB2209/SB2240 (STM32)"
+category: toolhead
 mcu: STM32F072
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Coloque o jumper 5V, conecte o USB, segure RESET e BOOT, solte RESET e depois BOOT (lsusb deve mostrar 0483:df11)"
+  instructions: "Set the 5V jumper, connect USB, hold RESET and BOOT, release RESET then BOOT (lsusb must show 0483:df11)"
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
   resistor_120r: jumper
-  avisos:
-    - "Jumper 5V necessário para alimentar via USB no modo DFU"
+  warnings:
+    - "5V jumper required to power via USB in DFU mode"

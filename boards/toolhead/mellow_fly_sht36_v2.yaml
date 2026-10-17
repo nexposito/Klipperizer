@@ -1,35 +1,33 @@
-# Mellow Fly SHT36 v2 — referência: canbus.esoterical.online (Common Toolhead Hardware)
-# VALIDAR: modo de boot, offset e pinos na página da placa no guia
-nome: "Mellow Fly SHT36 v2"
-categoria: toolhead
+# Mellow Fly SHT36 v2 — reference: canbus.esoterical.online (Common Toolhead Hardware)
+# VERIFY: boot method, offset and pins on the board page in the guide
+name: "Mellow Fly SHT36 v2"
+category: toolhead
 mcu: STM32F072
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "VALIDAR no guia: sequência de boot da SHT36 v2"
+  instructions: "VERIFY in the guide: SHT36 v2 boot sequence"
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
   resistor_120r: jumper
-  avisos:
-    - "Perfil gerado por padrão — valide MCU, offset e pinos na página da placa"
+  warnings:
+    - "Default-generated profile — VERIFY MCU, offset and pins on the board page"

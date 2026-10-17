@@ -1,34 +1,32 @@
-# BTT Octopus X7 (Troodon) — referência: canbus.esoterical.online (Common Mainboard Hardware)
-nome: "BTT Octopus X7 (Troodon)"
-categoria: mainboard
+# BTT Octopus X7 (Troodon) — reference: canbus.esoterical.online (Common Mainboard Hardware)
+name: "BTT Octopus X7 (Troodon)"
+category: mainboard
 mcu: STM32F446
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Segure BOOT, toque RESET, conte 5 e solte BOOT"
+  instructions: "Hold BOOT, tap RESET, count 5 and release BOOT"
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32F446=y"
-    - "CONFIG_CLOCK_FREQ_180M=y"
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F446=y"
+    - "CONFIG_STM32_FLASH_START_8000=y"
+    - "CONFIG_STM32_APP_START_8000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32F446=y"
-    - "CONFIG_CLOCK_FREQ_180M=y"
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F446=y"
+    - "CONFIG_STM32_FLASH_START_8000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
-  resistor_120r: permanente
-  avisos:
-    - "Confirme MCU, offset e pinos no guia antes do primeiro flash"
+  resistor_120r: permanent
+  warnings:
+    - "VERIFY MCU, offset and pins against the guide before the first flash"

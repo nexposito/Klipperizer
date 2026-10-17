@@ -1,25 +1,25 @@
 #!/usr/bin/env bash
 # ============================================================
-#  Klipperizer — Instalador
-#  Uso: bash install.sh
-#  Instala dependências, clona Klipper e Katapult, configura
-#  udev, comando global e (opcional) painel web touch.
+#  Klipperizer — Installer
+#  Usage: bash install.sh
+#  Installs dependencies, clones Klipper and Katapult, sets up
+#  udev rules, the executable bit and the global command.
 # ============================================================
 set -euo pipefail
 
 BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 log()  { echo -e "\033[1;34m[Klipperizer]\033[0m $*"; }
-erro() { echo -e "\033[1;31m[Erro]\033[0m $*" >&2; exit 1; }
+fail() { echo -e "\033[1;31m[Error]\033[0m $*" >&2; exit 1; }
 
-# ---------- 1. Dependências do sistema ----------
+# ---------- 1. System dependencies ----------
 if command -v apt-get >/dev/null; then PKG=apt
 elif command -v dnf >/dev/null; then PKG=dnf
 elif command -v pacman >/dev/null; then PKG=pacman
-else erro "Distribuição não suportada (apt/dnf/pacman)."
+else fail "Unsupported distribution (apt/dnf/pacman)."
 fi
 
-log "Instalando dependências do sistema (pedirá sudo)..."
+log "Installing system dependencies (will ask for sudo)..."
 case $PKG in
   apt)
     sudo apt-get update -qq
@@ -36,71 +36,57 @@ case $PKG in
     ;;
 esac
 
-# yq — processa os perfis YAML das placas
+# yq — processes the board profile YAML files
 if ! command -v yq >/dev/null 2>&1; then
-  log "Instalando yq..."
+  log "Installing yq..."
   case $(uname -m) in
     x86_64)        YQ_ARCH=amd64 ;;
     aarch64|arm64) YQ_ARCH=arm64 ;;
     armv7*|armv6*) YQ_ARCH=arm   ;;
-    *) erro "Arquitetura não suportada para yq: $(uname -m)" ;;
+    *) fail "Unsupported architecture for yq: $(uname -m)" ;;
   esac
   sudo wget -qO /usr/local/bin/yq \
     "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${YQ_ARCH}"
   sudo chmod +x /usr/local/bin/yq
 fi
 
-# ---------- 2. Ambiente Python (ferramentas de flash + painel web) ----------
-log "Criando ambiente Python..."
+# ---------- 2. Python environment (flash tools) ----------
+log "Creating Python environment..."
 python3 -m venv "$BASEDIR/.venv"
 "$BASEDIR/.venv/bin/pip" install --quiet --upgrade pip
-"$BASEDIR/.venv/bin/pip" install --quiet python-can pyserial flask
+"$BASEDIR/.venv/bin/pip" install --quiet python-can pyserial
 
-# ---------- 3. Klipper e Katapult (clona ou atualiza) ----------
-log "Preparando o Klipper (pode demorar)..."
+# ---------- 3. Klipper and Katapult (clone or update) ----------
+log "Preparing Klipper (may take a while)..."
 if [ -d "$BASEDIR/klipper/.git" ]; then
   git -C "$BASEDIR/klipper" pull --ff-only \
-    || log "Aviso: não foi possível atualizar o Klipper — mantendo a versão atual."
+    || log "Warning: could not update Klipper — keeping the current version."
 else
   git clone --depth 1 https://github.com/Klipper3d/klipper "$BASEDIR/klipper"
 fi
 
-log "Preparando o Katapult..."
+log "Preparing Katapult..."
 if [ -d "$BASEDIR/katapult/.git" ]; then
   git -C "$BASEDIR/katapult" pull --ff-only \
-    || log "Aviso: não foi possível atualizar o Katapult — mantendo a versão atual."
+    || log "Warning: could not update Katapult — keeping the current version."
 else
   git clone --depth 1 https://github.com/Arksine/katapult "$BASEDIR/katapult"
 fi
 
-# ---------- 4. Permissões de execução ----------
-# Arquivos vindos de sincronização (Drive/GitHub Desktop) podem perder o bit +x
+# ---------- 4. Executable permissions ----------
+# Files coming from sync services (Drive/GitHub Desktop) may lose the +x bit
 chmod +x "$BASEDIR/klipperizer" "$BASEDIR"/lib/*.sh \
-  "$BASEDIR/install.sh" "$BASEDIR/uninstall.sh" \
-  "$BASEDIR/web/kiosk.sh" 2>/dev/null || true
+  "$BASEDIR/install.sh" "$BASEDIR/uninstall.sh" 2>/dev/null || true
 
-# ---------- 5. Regras udev (flash sem sudo) ----------
-log "Instalando regras udev..."
+# ---------- 5. udev rules (flash without sudo) ----------
+log "Installing udev rules..."
 sudo cp "$BASEDIR/udev/99-klipperizer.rules" /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
-# ---------- 6. Comando global ----------
+# ---------- 6. Global command ----------
 sudo ln -sf "$BASEDIR/klipperizer" /usr/local/bin/klipperizer
 
-# ---------- 7. Painel web (opcional) ----------
-if command -v systemctl >/dev/null 2>&1 && \
-   whiptail --backtitle "Klipperizer" --title "Painel touch" \
-   --yesno "Instalar o painel web touch (para display de 5 polegadas)?\n\nO painel fica em http://<ip-da-máquina>:8080 e abre em qualquer navegador." \
-   0 0 3>&1 1>&2 2>&3; then
-  log "Instalando serviço do painel web..."
-  sudo cp "$BASEDIR/web/klipperizer-web.service" /etc/systemd/system/
-  sudo sed -i "s/%i/$(whoami)/g" /etc/systemd/system/klipperizer-web.service
-  sudo sed -i "s|/home/%i/klipperizer|$BASEDIR|g" /etc/systemd/system/klipperizer-web.service
-  sudo systemctl daemon-reload
-  sudo systemctl enable --now klipperizer-web
-  log "Painel disponível em: http://$(hostname -I | awk '{print $1}'):8080"
-fi
-
-log "Instalação concluída!"
-log "Rode 'klipperizer' para abrir o menu — Klipper e Katapult já estão prontos."
+log "Installation complete!"
+log "Run './klipperizer' from this folder to open the menu — Klipper and Katapult are ready."
+log "If the global 'klipperizer' command fails, './klipperizer' always works."

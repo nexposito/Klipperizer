@@ -1,31 +1,36 @@
-# BTT Eddy Duo — referência: canbus.esoterical.online (Common Toolhead Hardware)
-nome: "BTT Eddy Duo"
-categoria: toolhead
+# BTT Eddy Duo — reference: canbus.esoterical.online (Common Toolhead Hardware)
+name: "BTT Eddy Duo"
+category: toolhead
 mcu: RP2040
 bootloader:
-  metodo: bootsel
+  method: bootsel
   vid_pid:
     - "2e8a:0003"
-  instrucoes: "Mova a chave USB/CAN para USB, segure BOOT e conecte o cabo USB"
+  instructions: "Move the USB/CAN switch to USB, hold BOOT and connect the USB cable"
 katapult:
-  comum:
-    - "CONFIG_MCU_RP2040=y"
+  common:
+    - "CONFIG_MACH_RPXXXX=y"
+    - "CONFIG_MACH_RP2040=y"
+    - "CONFIG_RPXXXX_FLASH_START_4000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_GPIO20_GPIO21=y"       # VALIDAR: pinos CAN do Eddy
+    - "CONFIG_RPXXXX_CANBUS=y"
+    - "CONFIG_RPXXXX_CANBUS_GPIO_RX=20"   # VERIFY pins
+    - "CONFIG_RPXXXX_CANBUS_GPIO_TX=21"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_RPXXXX_USB=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_RP2040=y"
+  common:
+    - "CONFIG_MACH_RPXXXX=y"
+    - "CONFIG_MACH_RP2040=y"
+    - "CONFIG_RPXXXX_FLASH_START_4000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_GPIO20_GPIO21=y"       # VALIDAR: pinos CAN do Eddy
+    - "CONFIG_RPXXXX_CANBUS=y"
+    - "CONFIG_RPXXXX_CANBUS_GPIO_RX=20"   # VERIFY pins
+    - "CONFIG_RPXXXX_CANBUS_GPIO_TX=21"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_RPXXXX_USB=y"
 hardware:
   resistor_120r: jumper
-  avisos:
-    - "Chave física USB/CAN — volte para CAN após o flash"
-    - "Confirme os pinos CAN no guia antes do primeiro flash"
+  warnings:
+    - "Physical USB/CAN switch — move it back to CAN after flashing"
+    - "VERIFY the CAN GPIO numbers against the guide before the first flash"

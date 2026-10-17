@@ -1,112 +1,105 @@
 # Klipperizer
 
-Sistema automatizado de flash de firmware [Klipper](https://www.klipper3d.org/) para placas de impressoras 3D — com suporte a **CAN bus** e **USB**.
+Automated Klipper firmware flashing system for 3D printer boards — with **CAN bus** and **USB** support.
 
-Escolha a placa no menu, escolha a comunicação e o Klipperizer faz o resto: gera o `.config` do menuconfig automaticamente, compila, detecta a placa, avisa quando for preciso entrar em modo DFU e grava o firmware.
+Pick the board in the menu, pick the communication mode, and Klipperizer does the rest: generates the menuconfig `.config` automatically, builds, detects the board, warns when DFU mode is needed and flashes the firmware.
 
-## Instalação
+## Installation
 
 ```bash
-git clone https://github.com/SEU_USUARIO/Klipperizer.git
+git clone https://github.com/YOUR_USER/Klipperizer.git
 cd Klipperizer
 bash install.sh
 ```
 
-**Uma única instalação, tudo pronto.** O instalador cuida de:
+**One single install, everything ready.** The installer handles:
 
-- Dependências do sistema (git, build-essential, python3, dfu-util, can-utils, whiptail, yq)
-- Ambiente Python (python-can, pyserial, flask)
-- **Clone do Klipper e do Katapult** (ou atualização, se já existirem)
-- Regras udev (flash sem sudo)
-- Comando global `klipperizer`
-- Painel web touch (opcional, para display de 5 polegadas)
+- System dependencies (git, build-essential, python3, dfu-util, can-utils, whiptail, yq)
+- Python environment (python-can, pyserial)
+- **Klipper and Katapult clones** (or updates, if they already exist)
+- udev rules (flash without sudo)
+- Executable permissions and the global `klipperizer` command
 
-Rodar `bash install.sh` novamente atualiza o Klipper e o Katapult para a versão mais recente — é também o caminho de atualização do sistema.
+Running `bash install.sh` again updates Klipper and Katapult to the latest version — it is also the system update path.
 
-## Uso
+## Usage
 
-### Terminal (menu interativo)
-
-```bash
-klipperizer
-```
-
-1. Escolha a placa no menu
-2. Escolha a comunicação: **CAN** ou **USB**
-3. Siga as instruções na tela — o sistema avisa quando colocar a placa em modo DFU (apenas no primeiro flash)
-4. Nas atualizações seguintes, o flash é direto via Katapult, sem DFU
-
-### Painel touch (display de 5 polegadas)
-
-Se instalado, o painel fica em `http://<ip-da-máquina>:8080` — acessível pelo display touch e por qualquer navegador na rede (celular, PC). Cards grandes de placas, seletor de modo e log ao vivo.
-
-Para abrir automaticamente em tela cheia no display no boot:
+From inside the repository folder:
 
 ```bash
-# adicione ao autostart do desktop (ex.: /etc/xdg/lxsession/LXDE-pi/autostart no Raspberry Pi OS)
-@bash /caminho/para/Klipperizer/web/kiosk.sh
+./klipperizer
 ```
 
-### Linha de comando (scripts e automação)
+> **Important:** run it as `./klipperizer` (with the leading `./`). The bare `klipperizer` command only works when the symlink created by the installer (`/usr/local/bin/klipperizer`) is reachable — `./klipperizer` always works.
+
+1. Choose the board in the menu (board names only)
+2. Choose the communication: **CAN** or **USB**
+3. Follow the on-screen instructions — the system warns when to put the board in DFU mode (first flash only)
+4. On later updates, flashing goes straight through Katapult, no DFU needed
+
+### Command line (scripts and automation)
 
 ```bash
-klipperizer --list                          # lista placas em JSON
-klipperizer --flash boards/toolhead/btt_ebb36_v12.yaml can
+./klipperizer --list                              # list boards as JSON
+./klipperizer --flash boards/toolhead/btt_ebb36_v12.yaml can
 ```
 
-## Como funciona
+## How it works
 
-- **Perfis YAML** em `boards/` descrevem cada placa: MCU, opções de menuconfig, método de gravação, IDs USB e avisos de hardware
-- O sistema gera o `.config` a partir do perfil, compila **Katapult** (bootloader) e **Klipper**, e grava na placa
-- Primeiro flash: DFU/BOOT → Katapult → Klipper
-- Atualizações: direto via Katapult (USB serial ou CAN), sem DFU
-- Adaptadores USB-CAN (U2C, UTOC, UTC) recebem firmware direto via dfu-util
+- **YAML profiles** in `boards/` describe each board: MCU, menuconfig options, flashing method, USB IDs and hardware warnings
+- The system generates the `.config` from the profile, builds **Katapult** (bootloader) and **Klipper**, and flashes the board
+- First flash: DFU/BOOT → Katapult → Klipper
+- Updates: straight through Katapult (USB serial or CAN), no DFU
+- USB-CAN adapters (U2C, UTOC, UTC) receive firmware directly via dfu-util
 
-## Placas suportadas (56 perfis)
+## Supported boards (60 profiles)
 
 ### Toolheads (25)
 
 AFC-Lite (Boxturtle), AFC-Pro, BTT EBB36 Gen2, BTT EBB36 V1.2, BTT EBB42 Gen2, BTT EBB42 V1.2, BTT Eddy Duo, BTT MMB v1.0/v1.1, BTT MMB v2.0, BTT SB2209 (RP2040), BTT SB2209/SB2240 (STM32), DragonDinghy, Fysetc H36, Fysetc H36 v2.0, Fysetc PITB V1.0, Fysetc PITB V2.0, Fysetc SB Combo V2, Fysetc SB-CAN-TH, MKS THR36 V1.0, Mellow Fly ERCF, Mellow Fly SB2040 v1/v2, Mellow Fly SB2040 v3, Mellow Fly SHT36/SHT42, Mellow Fly SHT36 v2, Mellow Fly SHT36 v3
 
-### Mainboards (28)
+### Mainboards (32)
 
 BTT Kraken, BTT Manta E3EZ, BTT Manta M5P V1.0, BTT Manta M8P V1.1, BTT Manta M8P V2.0, BTT Octopus (F446/F429/F407/H723), BTT Octopus Max EZ, BTT Octopus Pro v1.1, BTT Octopus X7 (Troodon), BTT SKR Pico, BTT SKR-3, BTT SKR-3 EZ (H723/H743), BTT SKRat v1.0, Fysetc Hexa Distro Fusion, Fysetc Spider King, Fysetc Spider Pro, Fysetc Spider v1.0, Fysetc Spider v2.2, Fysetc Spider v2.3, Fysetc Spider v3.0, Fysetc Spider v3.0 H7, LDO Leviathan v1.2, LDO Leviathan v1.3, MKS Monster8 v2, Mellow FLY-D5P, Mellow FLY-Micro4, Mellow Fly-Super8, Mellow Fly-Super8 Pro H723
 
-### Adaptadores USB-CAN (3)
+### USB-CAN adapters (3)
 
 BTT U2C v2.1, Makerbase UTC 1.0, Mellow Fly UTOC-1/UTOC-3
 
-Base de referência: [canbus.esoterical.online](https://canbus.esoterical.online)
+Reference database: [canbus.esoterical.online](https://canbus.esoterical.online)
 
-## Estado dos perfis
+## Profile status
 
-- ✅ **Validados no guia**: modo de gravação, VID:PID, MCU e avisos de hardware
-- ⚠️ **Marcados com `# VALIDAR`**: offsets de bootloader e pinos CAN de algumas placas — o build valida os símbolos contra o Kconfig e falha com mensagem clara se algo estiver errado
+- ✅ **Verified**: flashing method, VID:PID, MCU and hardware warnings
+- ⚠️ **Marked with `# VERIFY`**: CAN pins and crystals of some boards — the build validates every symbol against the Kconfig and fails with a clear message if a name is wrong; pins must be checked against the guide
 
-## Adicionando uma placa
+## Adding a board
 
-Veja [CONTRIBUTING.md](CONTRIBUTING.md). Resumo:
+See [CONTRIBUTING.md](CONTRIBUTING.md). Summary:
 
-1. Copie `schema/boards.template.yaml` para `boards/<categoria>/<nome>.yaml`
-2. Preencha as opções de menuconfig (o guia do Esoterical tem os screenshots de cada placa; ou use `tools/extract_board_configs.py`)
-3. Abra um Pull Request — a CI valida o YAML automaticamente
+1. Copy `schema/boards.template.yaml` to `boards/<category>/<name>.yaml`
+2. Fill in the menuconfig options (the Esoterical guide has screenshots for every board; or use `tools/extract_board_configs.py`)
+3. Open a Pull Request — CI validates the YAML automatically
 
-## Estrutura
+## Structure
 
 ```
 Klipperizer/
-├── klipperizer        # menu principal + orquestração (CLI + modos --list/--flash)
-├── install.sh         # instalador completo (deps + Klipper + Katapult + udev + web)
-├── uninstall.sh       # desinstalador
-├── lib/               # build, detecção, flash e avisos
-├── boards/            # perfis das placas (YAML)
-├── schema/            # template de perfil
-├── udev/              # regras de acesso USB
-├── web/               # painel touch (Flask) + kiosk para display 5"
-├── tools/             # extrator de configs do guia Esoterical
-└── .github/workflows/ # CI (valida perfis e scripts)
+├── klipperizer        # main menu + orchestration (--list/--flash modes)
+├── install.sh         # full installer (deps + Klipper + Katapult + udev)
+├── uninstall.sh       # uninstaller
+├── lib/               # build, detection, flash and notifications
+├── boards/            # board profiles (YAML)
+├── schema/            # profile template
+├── udev/              # USB access rules
+├── tools/             # config extractor for the Esoterical guide
+└── .github/workflows/ # CI (validates profiles and scripts)
 ```
 
-## Licença
+## Roadmap
 
-GPL-3.0 — veja [LICENSE](LICENSE).
+- Native display interface (KlipperScreen-style, running directly on a 5" touch display)
+
+## License
+
+GPL-3.0 — see [LICENSE](LICENSE).

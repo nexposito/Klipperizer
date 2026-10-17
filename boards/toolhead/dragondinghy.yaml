@@ -1,35 +1,33 @@
-# DragonDinghy — referência: canbus.esoterical.online | docs: drachenkaetzchen.github.io/DragonDinghy
-nome: "DragonDinghy"
-categoria: toolhead
+# DragonDinghy — reference: canbus.esoterical.online | docs: drachenkaetzchen.github.io/DragonDinghy
+name: "DragonDinghy"
+category: toolhead
 mcu: STM32F072
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Alimente via 24V ou pelo jumper 5V USB, segure BOOT, toque RESET e solte BOOT (LED DFU acende)"
+  instructions: "Power via 24V or the 5V USB jumper, hold BOOT, tap RESET and release BOOT (DFU LED lights up)"
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
   resistor_120r: jumper
-  avisos:
-    - "LED DFU indica o modo de gravação"
-    - "Confirme MCU, offset e pinos no guia antes do primeiro flash"
+  warnings:
+    - "DFU LED indicates flashing mode"
+    - "VERIFY MCU, offset and pins against the guide before the first flash"

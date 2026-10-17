@@ -1,30 +1,35 @@
-# Mellow Fly ERCF — referência: canbus.esoterical.online (Common Toolhead Hardware)
-nome: "Mellow Fly ERCF"
-categoria: toolhead
+# Mellow Fly ERCF — reference: canbus.esoterical.online (Common Toolhead Hardware)
+name: "Mellow Fly ERCF"
+category: toolhead
 mcu: RP2040
 bootloader:
-  metodo: bootsel
+  method: bootsel
   vid_pid:
     - "2e8a:0003"
-  instrucoes: "Desconecte USB e CAN, segure BOOT, conecte o USB mantendo BOOT, aguarde e solte (lsusb mostra Pi RP2 Boot)"
+  instructions: "Disconnect USB and CAN, hold BOOT, connect USB keeping BOOT held, wait and release (lsusb shows Pi RP2 Boot)"
 katapult:
-  comum:
-    - "CONFIG_MCU_RP2040=y"
+  common:
+    - "CONFIG_MACH_RPXXXX=y"
+    - "CONFIG_MACH_RP2040=y"
+    - "CONFIG_RPXXXX_FLASH_START_4000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_GPIO25_GPIO26=y"       # VALIDAR: pinos CAN do ERCF
+    - "CONFIG_RPXXXX_CANBUS=y"
+    - "CONFIG_RPXXXX_CANBUS_GPIO_RX=25"   # VERIFY pins
+    - "CONFIG_RPXXXX_CANBUS_GPIO_TX=26"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_RPXXXX_USB=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_RP2040=y"
+  common:
+    - "CONFIG_MACH_RPXXXX=y"
+    - "CONFIG_MACH_RP2040=y"
+    - "CONFIG_RPXXXX_FLASH_START_4000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_GPIO25_GPIO26=y"       # VALIDAR: pinos CAN do ERCF
+    - "CONFIG_RPXXXX_CANBUS=y"
+    - "CONFIG_RPXXXX_CANBUS_GPIO_RX=25"   # VERIFY pins
+    - "CONFIG_RPXXXX_CANBUS_GPIO_TX=26"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_RPXXXX_USB=y"
 hardware:
-  resistor_120r: permanente
-  avisos:
-    - "Confirme os pinos CAN no guia antes do primeiro flash"
+  resistor_120r: permanent
+  warnings:
+    - "VERIFY the CAN GPIO numbers against the guide before the first flash"

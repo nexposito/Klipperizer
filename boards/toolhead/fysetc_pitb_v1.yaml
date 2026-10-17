@@ -1,35 +1,33 @@
-# Fysetc PITB V1.0 — referência: canbus.esoterical.online (Common Toolhead Hardware)
-nome: "Fysetc PITB V1.0"
-categoria: toolhead
+# Fysetc PITB V1.0 — reference: canbus.esoterical.online (Common Toolhead Hardware)
+name: "Fysetc PITB V1.0"
+category: toolhead
 mcu: STM32F072
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Desconecte o cabo CAN, conecte o USB, segure BOOT SEL, toque RST, conte 5 e solte BOOT SEL"
+  instructions: "Disconnect the CAN cable, connect USB, hold BOOT SEL, tap RST, count 5 and release BOOT SEL"
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
-  resistor_120r: permanente
-  avisos:
-    - "120R permanente — não removível"
-    - "Confirme MCU, offset e pinos no guia antes do primeiro flash"
+  resistor_120r: permanent
+  warnings:
+    - "120R permanent — not removable"
+    - "VERIFY MCU, offset and pins against the guide before the first flash"

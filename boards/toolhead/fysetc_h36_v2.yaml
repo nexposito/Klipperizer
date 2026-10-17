@@ -1,37 +1,35 @@
-# Fysetc H36 v2.0 — referência: canbus.esoterical.online (Common Toolhead Hardware)
-# ATENÇÃO: o modo CAN exige "GPIO pins to set at micro-controller startup" = !PA2
-# no Katapult E no Klipper — adicione o símbolo correto após validar no guia.
-nome: "Fysetc H36 v2.0"
-categoria: toolhead
+# Fysetc H36 v2.0 — reference: canbus.esoterical.online (Common Toolhead Hardware)
+# NOTE: CAN mode requires "GPIO pins to set at micro-controller startup" = !PA2
+# in BOTH Katapult and Klipper — add the correct symbol after verifying in the guide.
+name: "Fysetc H36 v2.0"
+category: toolhead
 mcu: STM32F072
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Conecte o USB, segure BOOT0, toque RESET, conte 5 e solte BOOT0"
+  instructions: "Connect USB, hold BOOT0, tap RESET, count 5 and release BOOT0"
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32F072=y"
-    - "CONFIG_CLOCK_FREQ_48M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32F072=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # VALIDAR: pinos
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
-  resistor_120r: permanente
-  avisos:
-    - "Modo CAN exige GPIO de startup !PA2 no Katapult e no Klipper"
-    - "120R habilitado de fábrica — cortar pads para desabilitar"
+  resistor_120r: permanent
+  warnings:
+    - "CAN mode requires the !PA2 startup GPIO in Katapult and Klipper"
+    - "120R enabled from factory — cut pads to disable"

@@ -6,31 +6,31 @@ on:
   pull_request:
 
 jobs:
-  validar-perfis:
+  validate-profiles:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Instalar yq
+      - name: Install yq
         run: |
           wget -qO yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           chmod +x yq
           sudo mv yq /usr/local/bin/yq
 
-      - name: Validar perfis de placas
+      - name: Validate board profiles
         run: |
-          falha=0
+          fail=0
           for f in boards/*/*.yaml; do
-            nome=$(yq eval '.nome' "$f" 2>/dev/null || true)
+            name=$(yq eval '.name' "$f" 2>/dev/null || true)
             vids=$(yq eval '.bootloader.vid_pid | length' "$f" 2>/dev/null || echo 0)
-            if [ -z "$nome" ] || [ "$nome" = "null" ] || [ "$vids" = "0" ]; then
-              echo "::error file=$f::Perfil inválido: precisa de 'nome' e ao menos um 'bootloader.vid_pid'"
-              falha=1
+            if [ -z "$name" ] || [ "$name" = "null" ] || [ "$vids" = "0" ]; then
+              echo "::error file=$f::Invalid profile: needs 'name' and at least one 'bootloader.vid_pid'"
+              fail=1
             else
-              echo "OK: $f ($nome)"
+              echo "OK: $f ($name)"
             fi
           done
-          exit $falha
+          exit $fail
 
   shellcheck:
     runs-on: ubuntu-latest

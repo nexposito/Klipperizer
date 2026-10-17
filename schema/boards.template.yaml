@@ -1,52 +1,62 @@
 # ============================================================
-#  Klipperizer — Template de perfil de placa
-#  Copie para boards/<categoria>/<placa>.yaml e preencha.
-#  Referência de menuconfig por placa:
-#  https://canbus.esoterical.online
-#  IMPORTANTE: símbolos CONFIG_* inválidos são detectados no
-#  build (verificar_simbolos) — nada passa em silêncio.
+#  Klipperizer — Board profile template
+#  Copy to boards/<category>/<board>.yaml and fill in.
+#  Symbols verified against the official Kconfigs (Oct 2026):
+#    Klipper:  github.com/Klipper3d/klipper → src/<family>/Kconfig
+#    Katapult: github.com/Arksine/katapult → src/<family>/Kconfig
 # ============================================================
 
-nome: "Nome da Placa vX.Y"        # exibido no menu
-categoria: toolhead               # toolhead | mainboard | adaptador
-mcu: STM32G0B1                    # chip real da placa
-
-# Opcional: placa com mais de uma variante de MCU (ex.: Octopus)
-# variantes:
-#   - mcu: STM32F446
-#     sufixo: "F446"
-#   - mcu: STM32H723
-#     sufixo: "H723"
+name: "Board Name vX.Y"
+category: toolhead               # toolhead | mainboard | adapter
+mcu: STM32G0B1                   # the board's real chip
 
 bootloader:
-  metodo: dfu                     # dfu | bootsel | sd
-  vid_pid:                        # IDs USB no modo DFU/BOOT (lsusb)
+  method: dfu                    # dfu | bootsel
+  vid_pid:
     - "0483:df11"
-  instrucoes: "Passos exatos para entrar no modo DFU/BOOT"
+  instructions: "Exact steps to enter DFU/BOOT mode"
 
-# Omita esta seção quando categoria: adaptador
+# ---- STM32 symbol patterns (Klipper and Katapult share the names) ----
+#   Architecture + model: CONFIG_MACH_STM32=y + CONFIG_MACH_<MODEL>=y
+#   CAN:  CONFIG_STM32_CANBUS_PA11_PA12=y   (alternatives: PB8_PB9, PD0_PD1*)
+#   USB:  CONFIG_STM32_USB_PA11_PA12=y
+#   (*PD0_PD1, PB0_PB1 and other pinouts require CONFIG_LOW_LEVEL_OPTIONS=y
+#    and the STM32_MMENU_CANBUS_* symbol)
+#   8KiB Katapult offset:  CONFIG_STM32_FLASH_START_2000=y
+#                          + CONFIG_STM32_APP_START_2000=y (Katapult only)
+#   32KiB (F4): ..._8000   |   128KiB (H7): ..._20000
+#   Clock Reference: hidden by default (8 MHz crystal assumed). For other
+#     crystals (e.g. 25 MHz on H7) add CONFIG_LOW_LEVEL_OPTIONS=y
+#     + CONFIG_STM32_CLOCK_REF_25M=y.
+#
+# ---- RP2040/RP2350 patterns ----
+#   Architecture: CONFIG_MACH_RPXXXX=y + CONFIG_MACH_RP2040=y
+#   CAN: CONFIG_RPXXXX_CANBUS=y + CONFIG_RPXXXX_CANBUS_GPIO_RX=<n>
+#        + CONFIG_RPXXXX_CANBUS_GPIO_TX=<n>   (GPIO numbers, not pairs!)
+#   USB: CONFIG_RPXXXX_USB=y
+#   Katapult/Klipper offset: CONFIG_RPXXXX_FLASH_START_4000=y (16KiB)
+
 katapult:
-  comum:                          # opções comuns aos dois modos
-    - "CONFIG_MCU_STM32G0B1=y"
-    - "CONFIG_CLOCK_FREQ_64M=y"
-    - "CONFIG_STM32_FLASH_START_8002000=y"   # offset do bootloader
-  can:                            # opções quando modo = can
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
-  usb:                            # opções quando modo = usb
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32G0B1=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+    - "CONFIG_STM32_APP_START_2000=y"
+  can:
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins against the guide
+  usb:
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 
 klipper:
-  comum: []
-  can: []
-  usb: []
-
-# Somente para categoria: adaptador (não roda Katapult/Klipper)
-# adaptador:
-#   firmware: "https://.../firmware.bin"
-#   comando: "dfu-util -d {vidpid} -a 0 -s 0x08000000:leave -D {arquivo}"
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32G0B1=y"
+    - "CONFIG_STM32_FLASH_START_2000=y"
+  can:
+    - "CONFIG_STM32_CANBUS_PA11_PA12=y"   # VERIFY pins against the guide
+  usb:
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 
 hardware:
-  resistor_120r: jumper           # permanente | jumper | nenhum | externo
-  avisos: []                      # exibidos antes do flash
+  resistor_120r: jumper           # permanent | jumper | none | external
+  warnings: []                    # shown before flashing

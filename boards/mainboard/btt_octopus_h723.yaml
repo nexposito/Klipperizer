@@ -1,34 +1,37 @@
-# BTT Octopus (STM32H723) — referência: canbus.esoterical.online (Common Mainboard Hardware)
-nome: "BTT Octopus (STM32H723)"
-categoria: mainboard
+# BTT Octopus (STM32H723) — reference: canbus.esoterical.online (Common Mainboard Hardware)
+name: "BTT Octopus (STM32H723)"
+category: mainboard
 mcu: STM32H723
 bootloader:
-  metodo: dfu
+  method: dfu
   vid_pid:
     - "0483:df11"
-  instrucoes: "Coloque o jumper BOOT e pressione o botão RESET (a placa pode estar alimentada por 24V ou pelo jumper USB power)"
+  instructions: "Set the BOOT jumper and press the RESET button (the board can be powered by 24V or the USB power jumper)"
+# H723: 128KiB Katapult offset, 25 MHz crystal (VERIFY) and FDCAN pins (VERIFY)
 katapult:
-  comum:
-    - "CONFIG_MCU_STM32H723=y"
-    - "CONFIG_CLOCK_FREQ_550M=y"             # VALIDAR: clock no guia
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32H723=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_CLOCK_REF_25M=y"   # VERIFY crystal
+    - "CONFIG_STM32_FLASH_START_20000=y"
+    - "CONFIG_STM32_APP_START_20000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"           # porta CAN no RJ12 (v1/v1.1)
+    - "CONFIG_STM32_MMENU_CANBUS_PB5_PB6=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
-    - "CONFIG_USB_IDS=1d50:6177"             # VALIDAR
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 klipper:
-  comum:
-    - "CONFIG_MCU_STM32H723=y"
-    - "CONFIG_CLOCK_FREQ_550M=y"             # VALIDAR: clock no guia
-    - "CONFIG_STM32_FLASH_START_8008000=y"   # VALIDAR: offset
+  common:
+    - "CONFIG_MACH_STM32=y"
+    - "CONFIG_MACH_STM32H723=y"
+    - "CONFIG_LOW_LEVEL_OPTIONS=y"
+    - "CONFIG_STM32_CLOCK_REF_25M=y"   # VERIFY crystal
+    - "CONFIG_STM32_FLASH_START_20000=y"
   can:
-    - "CONFIG_CAN_BUS=y"
-    - "CONFIG_CAN_BUS_PA11_PA12=y"
+    - "CONFIG_STM32_MMENU_CANBUS_PB5_PB6=y"   # VERIFY pins
   usb:
-    - "CONFIG_USB=y"
+    - "CONFIG_STM32_USB_PA11_PA12=y"
 hardware:
-  resistor_120r: permanente
-  avisos:
-    - "A Octopus tem 4 variantes de MCU — confira o chip antes de flashear"
+  resistor_120r: permanent
+  warnings:
+    - "The Octopus has 4 MCU variants — check the chip before flashing"

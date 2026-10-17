@@ -12,7 +12,16 @@ cd Klipperizer
 bash install.sh
 ```
 
-O instalador cuida de tudo: dependências (git, build-essential, python3, dfu-util, can-utils, whiptail, yq), ambiente Python, regras udev (flash sem sudo), comando global `klipperizer` e — opcionalmente — o **painel web touch** para display de 5 polegadas.
+**Uma única instalação, tudo pronto.** O instalador cuida de:
+
+- Dependências do sistema (git, build-essential, python3, dfu-util, can-utils, whiptail, yq)
+- Ambiente Python (python-can, pyserial, flask)
+- **Clone do Klipper e do Katapult** (ou atualização, se já existirem)
+- Regras udev (flash sem sudo)
+- Comando global `klipperizer`
+- Painel web touch (opcional, para display de 5 polegadas)
+
+Rodar `bash install.sh` novamente atualiza o Klipper e o Katapult para a versão mais recente — é também o caminho de atualização do sistema.
 
 ## Uso
 
@@ -87,7 +96,7 @@ Veja [CONTRIBUTING.md](CONTRIBUTING.md). Resumo:
 ```
 Klipperizer/
 ├── klipperizer        # menu principal + orquestração (CLI + modos --list/--flash)
-├── install.sh         # instalador
+├── install.sh         # instalador completo (deps + Klipper + Katapult + udev + web)
 ├── uninstall.sh       # desinstalador
 ├── lib/               # build, detecção, flash e avisos
 ├── boards/            # perfis das placas (YAML)

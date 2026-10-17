@@ -2,6 +2,8 @@
 # ============================================================
 #  Klipperizer — Instalador
 #  Uso: bash install.sh
+#  Instala dependências, clona Klipper e Katapult, configura
+#  udev, comando global e (opcional) painel web touch.
 # ============================================================
 set -euo pipefail
 
@@ -54,22 +56,39 @@ python3 -m venv "$BASEDIR/.venv"
 "$BASEDIR/.venv/bin/pip" install --quiet --upgrade pip
 "$BASEDIR/.venv/bin/pip" install --quiet python-can pyserial flask
 
-# ---------- 3. Permissões de execução ----------
+# ---------- 3. Klipper e Katapult (clona ou atualiza) ----------
+log "Preparando o Klipper (pode demorar)..."
+if [ -d "$BASEDIR/klipper/.git" ]; then
+  git -C "$BASEDIR/klipper" pull --ff-only \
+    || log "Aviso: não foi possível atualizar o Klipper — mantendo a versão atual."
+else
+  git clone --depth 1 https://github.com/Klipper3d/klipper "$BASEDIR/klipper"
+fi
+
+log "Preparando o Katapult..."
+if [ -d "$BASEDIR/katapult/.git" ]; then
+  git -C "$BASEDIR/katapult" pull --ff-only \
+    || log "Aviso: não foi possível atualizar o Katapult — mantendo a versão atual."
+else
+  git clone --depth 1 https://github.com/Arksine/katapult "$BASEDIR/katapult"
+fi
+
+# ---------- 4. Permissões de execução ----------
 # Arquivos vindos de sincronização (Drive/GitHub Desktop) podem perder o bit +x
 chmod +x "$BASEDIR/klipperizer" "$BASEDIR"/lib/*.sh \
   "$BASEDIR/install.sh" "$BASEDIR/uninstall.sh" \
   "$BASEDIR/web/kiosk.sh" 2>/dev/null || true
 
-# ---------- 4. Regras udev (flash sem sudo) ----------
+# ---------- 5. Regras udev (flash sem sudo) ----------
 log "Instalando regras udev..."
 sudo cp "$BASEDIR/udev/99-klipperizer.rules" /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
-# ---------- 5. Comando global ----------
+# ---------- 6. Comando global ----------
 sudo ln -sf "$BASEDIR/klipperizer" /usr/local/bin/klipperizer
 
-# ---------- 6. Painel web (opcional) ----------
+# ---------- 7. Painel web (opcional) ----------
 if command -v systemctl >/dev/null 2>&1 && \
    whiptail --backtitle "Klipperizer" --title "Painel touch" \
    --yesno "Instalar o painel web touch (para display de 5 polegadas)?\n\nO painel fica em http://<ip-da-máquina>:8080 e abre em qualquer navegador." \
@@ -84,4 +103,4 @@ if command -v systemctl >/dev/null 2>&1 && \
 fi
 
 log "Instalação concluída!"
-log "Rode 'klipperizer' para abrir o menu. Na 1ª execução o Klipper e o Katapult serão clonados."
+log "Rode 'klipperizer' para abrir o menu — Klipper e Katapult já estão prontos."

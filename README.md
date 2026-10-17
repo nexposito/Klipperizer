@@ -7,7 +7,7 @@ Pick the board type in the menu, pick the board, pick the communication mode, an
 ## Installation
 
 ```bash
-git clone https://github.com/YOUR_USER/Klipperizer.git
+git clone https://github.com/nexposito/Klipperizer.git
 cd Klipperizer
 bash install.sh
 ```

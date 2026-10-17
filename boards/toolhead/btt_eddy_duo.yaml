@@ -1,6 +1,6 @@
 # BTT Eddy Duo — reference: canbus.esoterical.online (Common Toolhead Hardware)
 name: "BTT Eddy Duo"
-category: toolhead
+category: inductive_probe
 mcu: RP2040
 bootloader:
   method: bootsel

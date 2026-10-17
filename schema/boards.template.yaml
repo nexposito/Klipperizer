@@ -1,13 +1,15 @@
 # ============================================================
 #  Klipperizer — Board profile template
 #  Copy to boards/<category>/<board>.yaml and fill in.
+#  Categories: toolhead | mainboard | filament_changer |
+#              inductive_probe | expansion_board | adapter
 #  Symbols verified against the official Kconfigs (Oct 2026):
 #    Klipper:  github.com/Klipper3d/klipper → src/<family>/Kconfig
 #    Katapult: github.com/Arksine/katapult → src/<family>/Kconfig
 # ============================================================
 
 name: "Board Name vX.Y"
-category: toolhead               # toolhead | mainboard | adapter
+category: toolhead               # toolhead | mainboard | filament_changer | inductive_probe | expansion_board | adapter
 mcu: STM32G0B1                   # the board's real chip
 
 bootloader:

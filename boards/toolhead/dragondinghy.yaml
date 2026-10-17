@@ -1,6 +1,6 @@
 # DragonDinghy — reference: canbus.esoterical.online | docs: drachenkaetzchen.github.io/DragonDinghy
 name: "DragonDinghy"
-category: toolhead
+category: expansion_board
 mcu: STM32F072
 bootloader:
   method: dfu

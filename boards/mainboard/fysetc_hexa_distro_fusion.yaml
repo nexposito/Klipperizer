@@ -1,6 +1,6 @@
 # Fysetc Hexa Distro Fusion — reference: canbus.esoterical.online (Common Mainboard Hardware)
 name: "Fysetc Hexa Distro Fusion"
-category: mainboard
+category: filament_changer
 mcu: STM32H723
 bootloader:
   method: dfu

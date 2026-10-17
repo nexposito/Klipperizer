@@ -1,7 +1,7 @@
 # Fysetc PITB V2.0 — reference: canbus.esoterical.online (Common Toolhead Hardware)
 # NOTE: without the CAN jumper the board enters CAN-FD (not supported by Klipper)
 name: "Fysetc PITB V2.0"
-category: toolhead
+category: expansion_board
 mcu: STM32F072
 bootloader:
   method: dfu

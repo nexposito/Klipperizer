@@ -1,6 +1,6 @@
 # AFC-Lite (Boxturtle) — reference: canbus.esoterical.online | docs: github.com/xbst/AFC-Lite
 name: "AFC-Lite (Boxturtle)"
-category: toolhead
+category: filament_changer
 mcu: STM32F072
 bootloader:
   method: dfu

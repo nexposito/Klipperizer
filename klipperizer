@@ -79,37 +79,73 @@ case "${1:-}" in
     ;;
 esac
 
-# ---------- Interactive menu ----------
+# ---------- Interactive menu (two steps: category → board) ----------
 need whiptail
 
 mapfile -t ARQS < <(find "$BASEDIR/boards" -name '*.yaml' | sort)
 [ ${#ARQS[@]} -gt 0 ] || { echo "No profiles in boards/. Copy schema/boards.template.yaml."; exit 1; }
 
-# Menu shows board names only (no file paths)
+# Step 1 — board type
+cat_label() {
+  case "$1" in
+    toolhead)          echo "Toolhead" ;;
+    mainboard)         echo "Mainboard" ;;
+    filament_changer)  echo "Filament changer" ;;
+    inductive_probe)   echo "Inductive probe" ;;
+    expansion_board)   echo "Expansion board" ;;
+    adapter)           echo "USB-CAN adapter" ;;
+    *)                 echo "$1" ;;
+  esac
+}
+
+# Collect categories present in boards/ (sorted, unique)
+mapfile -t CATS < <(
+  for f in "${ARQS[@]}"; do yq eval '.category' "$f" 2>/dev/null; done \
+    | grep -v '^null$' | grep -v '^$' | sort -u
+)
+[ ${#CATS[@]} -gt 0 ] || { echo "No valid categories in boards/ profiles."; exit 1; }
+
+CAT_MENU=()
+for c in "${CATS[@]}"; do
+  CAT_MENU+=("$c" "$(cat_label "$c")")
+done
+
+CATEGORY=$(whiptail --backtitle "Klipperizer" --title "Board type" \
+  --menu "What kind of board are you flashing?" 0 0 0 "${CAT_MENU[@]}" \
+  3>&1 1>&2 2>&3) || exit 0
+
+# Step 2 — board within the chosen category (names only, no file paths)
+FILTERED=()
 NAMES=()
 for f in "${ARQS[@]}"; do
-  NAMES+=("$(yq eval '.name' "$f")")
+  c=$(yq eval '.category' "$f" 2>/dev/null)
+  if [ "$c" = "$CATEGORY" ]; then
+    FILTERED+=("$f")
+    NAMES+=("$(yq eval '.name' "$f")")
+  fi
 done
-MENU=()
+[ ${#FILTERED[@]} -gt 0 ] || { echo "No boards in category: $CATEGORY"; exit 1; }
+
+BOARD_MENU=()
 for n in "${NAMES[@]}"; do
-  MENU+=("$n" "")
+  BOARD_MENU+=("$n" "")
 done
 
 SELECTED=$(whiptail --backtitle "Klipperizer" --title "Board selection" \
-  --menu "Choose the board to flash:" 0 0 0 "${MENU[@]}" \
+  --menu "Choose the board to flash:" 0 0 0 "${BOARD_MENU[@]}" \
   3>&1 1>&2 2>&3) || exit 0
 
 PROFILE=""
 for i in "${!NAMES[@]}"; do
   if [ "${NAMES[$i]}" = "$SELECTED" ]; then
-    PROFILE="${ARQS[$i]}"
+    PROFILE="${FILTERED[$i]}"
     break
   fi
 done
 [ -n "$PROFILE" ] || { echo "Board not found: $SELECTED"; exit 1; }
 
 MODE=$(whiptail --backtitle "Klipperizer" --title "Communication" \
-  --menu "How will the board '$(yq eval '.name' "$PROFILE")' communicate?" 0 0 0 \
+  --menu "How will the board '$SELECTED' communicate?" 0 0 0 \
   can "CAN bus" usb "USB (serial)" \
   3>&1 1>&2 2>&3) || exit 0
 

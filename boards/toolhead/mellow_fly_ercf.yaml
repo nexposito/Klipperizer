@@ -1,6 +1,6 @@
 # Mellow Fly ERCF — reference: canbus.esoterical.online (Common Toolhead Hardware)
 name: "Mellow Fly ERCF"
-category: toolhead
+category: filament_changer
 mcu: RP2040
 bootloader:
   method: bootsel

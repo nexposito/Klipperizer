@@ -1,6 +1,6 @@
 # AFC-Pro — reference: canbus.esoterical.online | docs: github.com/xbst/AFC-Pro
 name: "AFC-Pro"
-category: toolhead
+category: filament_changer
 mcu: STM32F072
 bootloader:
   method: dfu

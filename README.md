@@ -2,7 +2,7 @@
 
 Automated Klipper firmware flashing system for 3D printer boards — with **CAN bus** and **USB** support.
 
-Pick the board in the menu, pick the communication mode, and Klipperizer does the rest: generates the menuconfig `.config` automatically, builds, detects the board, warns when DFU mode is needed and flashes the firmware.
+Pick the board type in the menu, pick the board, pick the communication mode, and Klipperizer does the rest: generates the menuconfig `.config` automatically, builds, detects the board, warns when DFU mode is needed and flashes the firmware.
 
 ## Installation
 
@@ -32,10 +32,11 @@ From inside the repository folder:
 
 > **Important:** run it as `./klipperizer` (with the leading `./`). The bare `klipperizer` command only works when the symlink created by the installer (`/usr/local/bin/klipperizer`) is reachable — `./klipperizer` always works.
 
-1. Choose the board in the menu (board names only)
-2. Choose the communication: **CAN** or **USB**
-3. Follow the on-screen instructions — the system warns when to put the board in DFU mode (first flash only)
-4. On later updates, flashing goes straight through Katapult, no DFU needed
+1. Choose the **board type**: Toolhead, Mainboard, Filament changer, Inductive probe, Expansion board or USB-CAN adapter
+2. Choose the **board** from the list (names only)
+3. Choose the communication: **CAN** or **USB**
+4. Follow the on-screen instructions — the system warns when to put the board in DFU mode (first flash only)
+5. On later updates, flashing goes straight through Katapult, no DFU needed
 
 ### Command line (scripts and automation)
 
@@ -46,23 +47,35 @@ From inside the repository folder:
 
 ## How it works
 
-- **YAML profiles** in `boards/` describe each board: MCU, menuconfig options, flashing method, USB IDs and hardware warnings
+- **YAML profiles** in `boards/` describe each board: category, MCU, menuconfig options, flashing method, USB IDs and hardware warnings
 - The system generates the `.config` from the profile, builds **Katapult** (bootloader) and **Klipper**, and flashes the board
 - First flash: DFU/BOOT → Katapult → Klipper
 - Updates: straight through Katapult (USB serial or CAN), no DFU
 - USB-CAN adapters (U2C, UTOC, UTC) receive firmware directly via dfu-util
 
-## Supported boards (60 profiles)
+## Supported boards (60 profiles, 6 categories)
 
-### Toolheads (25)
+### Toolhead (16)
 
-AFC-Lite (Boxturtle), AFC-Pro, BTT EBB36 Gen2, BTT EBB36 V1.2, BTT EBB42 Gen2, BTT EBB42 V1.2, BTT Eddy Duo, BTT MMB v1.0/v1.1, BTT MMB v2.0, BTT SB2209 (RP2040), BTT SB2209/SB2240 (STM32), DragonDinghy, Fysetc H36, Fysetc H36 v2.0, Fysetc PITB V1.0, Fysetc PITB V2.0, Fysetc SB Combo V2, Fysetc SB-CAN-TH, MKS THR36 V1.0, Mellow Fly ERCF, Mellow Fly SB2040 v1/v2, Mellow Fly SB2040 v3, Mellow Fly SHT36/SHT42, Mellow Fly SHT36 v2, Mellow Fly SHT36 v3
+BTT EBB36 Gen2, BTT EBB36 V1.2, BTT EBB42 Gen2, BTT EBB42 V1.2, BTT SB2209 (RP2040), BTT SB2209/SB2240 (STM32), Fysetc H36, Fysetc H36 v2.0, Fysetc SB Combo V2, Fysetc SB-CAN-TH, MKS THR36 V1.0, Mellow Fly SB2040 v1/v2, Mellow Fly SB2040 v3, Mellow Fly SHT36 and SHT42, Mellow Fly SHT36 v2, Mellow Fly SHT36 v3
 
-### Mainboards (32)
+### Mainboard (30)
 
-BTT Kraken, BTT Manta E3EZ, BTT Manta M5P V1.0, BTT Manta M8P V1.1, BTT Manta M8P V2.0, BTT Octopus (F446/F429/F407/H723), BTT Octopus Max EZ, BTT Octopus Pro v1.1, BTT Octopus X7 (Troodon), BTT SKR Pico, BTT SKR-3, BTT SKR-3 EZ (H723/H743), BTT SKRat v1.0, Fysetc Hexa Distro Fusion, Fysetc Spider King, Fysetc Spider Pro, Fysetc Spider v1.0, Fysetc Spider v2.2, Fysetc Spider v2.3, Fysetc Spider v3.0, Fysetc Spider v3.0 H7, LDO Leviathan v1.2, LDO Leviathan v1.3, MKS Monster8 v2, Mellow FLY-D5P, Mellow FLY-Micro4, Mellow Fly-Super8, Mellow Fly-Super8 Pro H723
+BTT Kraken, BTT Manta E3EZ, BTT Manta M5P V1.0, BTT Manta M8P V1.1, BTT Manta M8P V2.0, BTT Octopus (STM32F407), BTT Octopus (STM32F446), BTT Octopus (STM32H723), BTT Octopus Max EZ, BTT Octopus Pro v1.1, BTT Octopus X7 (Troodon), BTT SKR Pico, BTT SKR-3, BTT SKR-3 EZ (STM32H723), BTT SKR-3 EZ (STM32H743), BTT SKRat v1.0, Fysetc Spider King, Fysetc Spider Pro, Fysetc Spider v1.0, Fysetc Spider v2.2, Fysetc Spider v2.3, Fysetc Spider v3.0, Fysetc Spider v3.0 H7, LDO Leviathan v1.2, LDO Leviathan v1.3, MKS Monster8 v2, Mellow FLY-D5P, Mellow FLY-Micro4, Mellow Fly-Super8, Mellow Fly-Super8 Pro H723
 
-### USB-CAN adapters (3)
+### Filament changer (6)
+
+AFC-Lite (Boxturtle), AFC-Pro, BTT MMB CAN v1.0/v1.1, BTT MMB CAN v2.0, Fysetc Hexa Distro Fusion, Mellow Fly ERCF
+
+### Inductive probe (1)
+
+BTT Eddy Duo
+
+### Expansion board (3)
+
+DragonDinghy, Fysetc PITB V1.0, Fysetc PITB V2.0
+
+### USB-CAN adapter (3)
 
 BTT U2C v2.1, Makerbase UTC 1.0, Mellow Fly UTOC-1/UTOC-3
 
@@ -85,7 +98,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Summary:
 
 ```
 Klipperizer/
-├── klipperizer        # main menu + orchestration (--list/--flash modes)
+├── klipperizer        # main menu (type → board → mode) + orchestration
 ├── install.sh         # full installer (deps + Klipper + Katapult + udev)
 ├── uninstall.sh       # uninstaller
 ├── lib/               # build, detection, flash and notifications

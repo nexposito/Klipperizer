@@ -1,6 +1,6 @@
 # BTT MMB CAN v2.0 — reference: canbus.esoterical.online (Common Toolhead Hardware)
 name: "BTT MMB CAN v2.0"
-category: toolhead
+category: filament_changer
 mcu: STM32G0B1
 bootloader:
   method: dfu

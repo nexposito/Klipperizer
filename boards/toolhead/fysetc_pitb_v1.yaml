@@ -1,6 +1,6 @@
 # Fysetc PITB V1.0 — reference: canbus.esoterical.online (Common Toolhead Hardware)
 name: "Fysetc PITB V1.0"
-category: toolhead
+category: expansion_board
 mcu: STM32F072
 bootloader:
   method: dfu

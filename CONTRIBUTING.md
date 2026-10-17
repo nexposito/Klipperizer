@@ -2,13 +2,26 @@
 
 Thanks for wanting to add a board! The process is simple and CI validates everything automatically.
 
+## Board categories
+
+Every profile declares a `category` that drives the two-step menu (type → board). Valid values:
+
+| Category | Use for |
+|---|---|
+| `toolhead` | Boards mounted on the print head (EBB, SB2209, SHT, SB2040...) |
+| `mainboard` | Printer mainboards (Octopus, Spider, Manta, SKR...) |
+| `filament_changer` | Multi-material unit controllers (AFC, ERCF, MMB, Hexa Distro) |
+| `inductive_probe` | Probe boards (Eddy Duo) |
+| `expansion_board` | CAN expansion boards (DragonDinghy, PITB) |
+| `adapter` | Dedicated USB-CAN bridges (U2C, UTOC, UTC) — do not run Klipper |
+
 ## Adding a new board
 
 1. **Copy the template**:
    ```bash
    cp schema/boards.template.yaml boards/toolhead/my_board.yaml
    ```
-   (use `mainboard/` or `adapter/` as appropriate)
+   (use the folder matching the category)
 
 2. **Fill in the fields** — the main reference is the
    [canbus.esoterical.online](https://canbus.esoterical.online) guide, which has
@@ -31,7 +44,7 @@ Thanks for wanting to add a board! The process is simple and CI validates everyt
 - **Invalid CONFIG_* symbols never pass silently**: the build validates every
   symbol against the real Kconfig and fails with a clear message. Even so,
   validate offsets and pins with a real board when possible.
-- **USB-CAN adapters** (U2C, UTOC, UTC) do not run Katapult/Klipper —
+- **USB-CAN adapters** (`category: adapter`) do not run Katapult/Klipper —
   use the `adapter` section with `firmware` (binary URL) and `command`
   (dfu-util with `{vidpid}` and `{file}`).
 - **Boards with MCU variants** (Octopus, SKR-3 EZ): create one profile per

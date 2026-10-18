@@ -8,6 +8,7 @@ bootloader:
     - "0483:df11"
   instructions: "Connect the board to the breakout, remove the USB/CAN jumper, power the breakout via USB, hold BOOT, tap RST, count 5 and release BOOT"
 # CAN on PB0/PB1 requires low-level options (same family as EBB36 V1.2 — VERIFY)
+# Status LED blinks while the board sits in the Katapult bootloader
 katapult:
   common:
     - "CONFIG_MACH_STM32=y"
@@ -15,6 +16,8 @@ katapult:
     - "CONFIG_LOW_LEVEL_OPTIONS=y"
     - "CONFIG_STM32_FLASH_START_2000=y"
     - "CONFIG_STM32_APP_START_2000=y"
+    - "CONFIG_ENABLE_STATUS_LED=y"
+    - 'CONFIG_STATUS_LED_GPIO_PIN="PA13"'   # VERIFY pin on the guide
   can:
     - "CONFIG_STM32_MMENU_CANBUS_PB0_PB1=y"   # VERIFY pins
   usb:

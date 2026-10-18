@@ -24,17 +24,22 @@ case $PKG in
   apt)
     sudo apt-get update -qq
     sudo apt-get install -y git build-essential python3 python3-venv python3-pip \
-      dfu-util can-utils iproute2 whiptail wget curl
+      dfu-util can-utils iproute2 whiptail wget curl gcc-arm-none-eabi
     ;;
   dnf)
     sudo dnf install -y git gcc make python3 python3-pip dfu-util can-utils \
-      iproute2 newt wget curl
+      iproute2 newt wget curl arm-none-eabi-gcc-cs arm-none-eabi-newlib-cs
     ;;
   pacman)
     sudo pacman -Sy --needed git base-devel python python-pip dfu-util can-utils \
-      iproute2 libnewt wget curl
+      iproute2 libnewt wget curl arm-none-eabi-gcc arm-none-eabi-newlib
     ;;
 esac
+
+# The ARM cross-compiler is mandatory: Klipper and Katapult firmware for
+# STM32/RP2040 cannot build with the native gcc alone
+command -v arm-none-eabi-gcc >/dev/null 2>&1 \
+  || fail "ARM cross-compiler (arm-none-eabi-gcc) not found — install it manually and re-run install.sh"
 
 # yq — processes the board profile YAML files
 if ! command -v yq >/dev/null 2>&1; then

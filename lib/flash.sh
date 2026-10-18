@@ -3,7 +3,8 @@
 #  Flash paths by board state:
 #    usb-Katapult_*  → flashtool.py -f <bin> -d <dev>    (direct)
 #    usb-Klipper_*   → flashtool.py -r -f <bin> -d <dev> (requests the bootloader)
-#    DFU/BOOT        → make flash FLASH_DEVICE=<vid:pid> (first flash)
+#    DFU/BOOT (STM32)→ dfu-util -R -a 0 -s 0x08000000:mass-erase:force:leave
+#    DFU/BOOT (other)→ make flash FLASH_DEVICE=<vid:pid>
 #    CAN node        → flashtool.py -i can0 -f <bin> -u <uuid>
 #  Note: Katapult renamed flash_can.py → flashtool.py; the system
 #  automatically detects which of the two exists.
@@ -20,6 +21,31 @@ _flashtool_path() {
   else
     echo "$katdir/scripts/flash_can.py"
   fi
+}
+
+_check_modemmanager() {
+  # ModemManager probes new USB devices and can hijack a DFU session
+  # mid-flash ('Error during download get_status'). Warn before flashing.
+  if command -v systemctl >/dev/null 2>&1 && \
+     systemctl is-active ModemManager >/dev/null 2>&1; then
+    warn "ModemManager is active — it can hijack DFU flashing and cause 'Error during download get_status'."
+    warn "Disable it now with: sudo systemctl stop ModemManager"
+  fi
+}
+
+_dfu_flash_stm32() {
+  # $1 = katapult dir | $2 = vid:pid
+  # Esoterical guide command for STM32 DFU: mass-erase wipes the whole flash
+  # before the download and 'force' overrides erase-capability quirks of some
+  # STM32 DFU bootloaders — more robust than the plain 'make flash' wrapper.
+  local katdir="$1" vp="$2"
+  if dfu-util -R -a 0 -s 0x08000000:mass-erase:force:leave \
+       -D "$katdir/out/katapult.bin" -d "$vp"; then
+    return 0
+  fi
+  warn "dfu-util failed without sudo — retrying with sudo (udev permissions may be missing)..."
+  sudo dfu-util -R -a 0 -s 0x08000000:mass-erase:force:leave \
+    -D "$katdir/out/katapult.bin" -d "$vp"
 }
 
 query_can_uuid() {
@@ -91,11 +117,14 @@ _flash_can() {
 
 _first_flash() {
   local profile="$1" mode="$2" kdir="$3" katdir="$4"
-  local name vids vp uuid t dev ft
+  local name vids vp uuid t dev ft method
   name=$(yq eval '.name' "$profile")
   ft=$(_flashtool_path "$katdir")
+  method=$(yq eval '.bootloader.method' "$profile")
   vids=$(yq eval '.bootloader.vid_pid[]' "$profile" 2>/dev/null | tr '\n' ' ')
   [ -n "$vids" ] || fatal "Profile has no bootloader.vid_pid"
+
+  _check_modemmanager
 
   warn "FIRST FLASH — put $name in DFU/BOOT mode now:"
   warn "$(yq eval '.bootloader.instructions' "$profile")"
@@ -104,8 +133,13 @@ _first_flash() {
   success "Device detected: $vp"
 
   warn "Flashing Katapult via DFU/BOOT..."
-  make -C "$katdir" flash FLASH_DEVICE="$vp" >/dev/null \
-    || fatal "Failed to flash Katapult"
+  if [ "$method" = "dfu" ]; then
+    _dfu_flash_stm32 "$katdir" "$vp" \
+      || fatal "Failed to flash Katapult via DFU. Power cycle the board (unplug USB, wait 5s, redo the BOOT sequence) and run again. If it keeps failing: 'sudo systemctl stop ModemManager', another USB cable, or connect directly to the host (no hub)."
+  else
+    make -C "$katdir" flash FLASH_DEVICE="$vp" >/dev/null \
+      || fatal "Failed to flash Katapult via BOOT. Power cycle the board (unplug USB, wait 5s, redo the BOOT sequence) and run again."
+  fi
 
   warn "Waiting for the board to re-enumerate..."
   if [ "$mode" = "usb" ]; then
@@ -137,6 +171,8 @@ _flash_adapter() {
   [ -n "$url" ] && [ "$url" != "null" ] || fatal "Adapter profile has no 'adapter.firmware'"
   [ -n "$cmd" ] && [ "$cmd" != "null" ] || fatal "Adapter profile has no 'adapter.command' — set it after choosing the firmware"
 
+  _check_modemmanager
+
   mkdir -p "$KLIPPERIZER_BASE/out"
   file="$KLIPPERIZER_BASE/out/$(basename "$url")"
   warn "Downloading adapter firmware..."
@@ -149,6 +185,7 @@ _flash_adapter() {
 
   cmd="${cmd//\\{vidpid\\}/$vp}"
   cmd="${cmd//\\{file\\}/$file}"
-  bash -c "$cmd" || fatal "Failed to flash the adapter"
+  bash -c "$cmd" \
+    || fatal "Failed to flash the adapter. Power cycle it (unplug USB, redo the BOOT sequence) and run again. If it keeps failing: 'sudo systemctl stop ModemManager'."
   success "Adapter flashed!"
 }

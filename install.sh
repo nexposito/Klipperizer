@@ -89,7 +89,19 @@ sudo cp "$BASEDIR/udev/99-klipperizer.rules" /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
-# ---------- 6. Global command ----------
+# ---------- 6. ModemManager (breaks DFU/serial flashing) ----------
+# ModemManager probes every new USB device and can hijack a DFU session
+# mid-flash, causing 'Error during download get_status'. Same reason KIAUH
+# offers to disable it. Re-enable later with:
+#   sudo systemctl enable --now ModemManager
+if command -v systemctl >/dev/null 2>&1 && \
+   systemctl is-active ModemManager >/dev/null 2>&1; then
+  log "Disabling ModemManager (it probes new USB devices and breaks DFU flashing)..."
+  sudo systemctl stop ModemManager
+  sudo systemctl disable ModemManager
+fi
+
+# ---------- 7. Global command ----------
 sudo ln -sf "$BASEDIR/klipperizer" /usr/local/bin/klipperizer
 
 log "Installation complete!"

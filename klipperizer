@@ -85,7 +85,7 @@ need whiptail
 mapfile -t ARQS < <(find "$BASEDIR/boards" -name '*.yaml' | sort)
 [ ${#ARQS[@]} -gt 0 ] || { echo "No profiles in boards/. Copy schema/boards.template.yaml."; exit 1; }
 
-# Step 1 — board type
+# Step 1 — board type (single column: readable labels only)
 cat_label() {
   case "$1" in
     toolhead)          echo "Toolhead" ;;
@@ -107,12 +107,22 @@ mapfile -t CATS < <(
 
 CAT_MENU=()
 for c in "${CATS[@]}"; do
-  CAT_MENU+=("$c" "$(cat_label "$c")")
+  CAT_MENU+=("$(cat_label "$c")" "")
 done
 
-CATEGORY=$(whiptail --backtitle "Klipperizer" --title "Board type" \
+CATEGORY_LABEL=$(whiptail --backtitle "Klipperizer" --title "Board type" \
   --menu "What kind of board are you flashing?" 0 0 0 "${CAT_MENU[@]}" \
   3>&1 1>&2 2>&3) || exit 0
+
+# Map the displayed label back to the profile category key
+CATEGORY=""
+for c in "${CATS[@]}"; do
+  if [ "$(cat_label "$c")" = "$CATEGORY_LABEL" ]; then
+    CATEGORY="$c"
+    break
+  fi
+done
+[ -n "$CATEGORY" ] || { echo "Category not found: $CATEGORY_LABEL"; exit 1; }
 
 # Step 2 — board within the chosen category (names only, no file paths)
 FILTERED=()
@@ -144,9 +154,16 @@ for i in "${!NAMES[@]}"; do
 done
 [ -n "$PROFILE" ] || { echo "Board not found: $SELECTED"; exit 1; }
 
-MODE=$(whiptail --backtitle "Klipperizer" --title "Communication" \
+# Step 3 — communication (single column: readable labels only)
+MODE_LABEL=$(whiptail --backtitle "Klipperizer" --title "Communication" \
   --menu "How will the board '$SELECTED' communicate?" 0 0 0 \
-  can "CAN bus" usb "USB (serial)" \
+  "CAN bus" "" "USB (serial)" "" \
   3>&1 1>&2 2>&3) || exit 0
+
+case "$MODE_LABEL" in
+  "CAN bus")      MODE=can ;;
+  "USB (serial)") MODE=usb ;;
+  *)              exit 0 ;;
+esac
 
 run_flash "$PROFILE" "$MODE"

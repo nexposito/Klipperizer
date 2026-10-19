@@ -21,6 +21,10 @@
 #       message (disconnect USB, connect CAN-H/CAN-L) + ENTER
 #       confirmation before polling the bus for the UUID
 #    4. Klipper flash (only if step 2 succeeded)
+#
+#  Serial permission handling: every serial flash goes through
+#  _run_flashtool, which tests write access on the device first and
+#  falls back to sudo on Errno 13 (udev rules not applied yet).
 #  Note: Katapult renamed flash_can.py → flashtool.py; the system
 #  automatically detects which of the two exists.
 # ============================================================
@@ -36,6 +40,26 @@ _flashtool_path() {
   else
     echo "$katdir/scripts/flash_can.py"
   fi
+}
+
+_run_flashtool() {
+  # $1 = flashtool path | rest = arguments
+  # Runs the Katapult flash tool. When the target serial device (-d) is
+  # not writable by the current user (Errno 13), retries with sudo and
+  # prints the permanent fix instead of failing with a traceback.
+  local ft="$1"; shift
+  local a dev="" prev=""
+  for a in "$@"; do
+    [ "$prev" = "-d" ] && dev="$a"
+    prev="$a"
+  done
+  if [ -z "$dev" ] || [ ! -e "$dev" ] || { [ -r "$dev" ] && [ -w "$dev" ]; }; then
+    "$PYTHON" "$ft" "$@"
+    return
+  fi
+  warn "No write permission on $dev — retrying with sudo..."
+  warn "Permanent fix: re-run 'bash install.sh' (udev rules + dialout group), then log out and back in."
+  sudo "$PYTHON" "$ft" "$@"
 }
 
 _check_modemmanager() {
@@ -177,7 +201,7 @@ flash_board() {
   if [ -n "$dev" ]; then
     success "Katapult already installed (detected via USB: $dev) — skipping the Katapult flash."
     warn "Flashing the $mode-configured Klipper via Katapult USB..."
-    "$PYTHON" "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
+    _run_flashtool "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
       || fatal "Failed to flash Klipper via Katapult USB"
     success "Klipper flashed successfully!"
     if [ "$mode" = "can" ]; then
@@ -225,7 +249,7 @@ _flash_usb() {
   dev=$(detect_katapult_serial)
   if [ -n "$dev" ]; then
     warn "Katapult detected: $dev — flashing Klipper..."
-    "$PYTHON" "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
+    _run_flashtool "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
       || fatal "Failed to flash via Katapult USB"
     success "Klipper flashed on $name"
     return
@@ -234,7 +258,7 @@ _flash_usb() {
   dev=$(detect_klipper_serial)
   if [ -n "$dev" ]; then
     warn "Running Klipper detected: $dev — requesting bootloader entry..."
-    "$PYTHON" "$ft" -r -f "$kdir/out/klipper.bin" -d "$dev" \
+    _run_flashtool "$ft" -r -f "$kdir/out/klipper.bin" -d "$dev" \
       || fatal "Failed to flash via Klipper USB"
     success "Klipper flashed on $name"
     return
@@ -284,7 +308,7 @@ _first_flash() {
     dev="${state#* }"
     success "Katapult already installed (detected via USB: $dev) — skipping the Katapult flash."
     warn "Flashing the $mode-configured Klipper via Katapult USB..."
-    "$PYTHON" "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
+    _run_flashtool "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
       || fatal "Klipper flash FAILED via USB."
     success "Klipper flashed successfully!"
     if [ "$mode" = "can" ]; then
@@ -335,7 +359,7 @@ _first_flash() {
   # ---- STEP 4: flash Klipper ----
   warn "STEP 4/4 — Flashing Klipper..."
   if [ "$mode" = "usb" ]; then
-    "$PYTHON" "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
+    _run_flashtool "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
       || fatal "Klipper flash FAILED via USB."
   else
     "$PYTHON" "$ft" -i can0 -f "$kdir/out/klipper.bin" -u "$uuid" \

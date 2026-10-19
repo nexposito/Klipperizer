@@ -84,8 +84,31 @@ chmod +x "$BASEDIR/klipperizer" "$BASEDIR"/lib/*.sh \
   "$BASEDIR/install.sh" "$BASEDIR/uninstall.sh" 2>/dev/null || true
 
 # ---------- 5. udev rules (flash without sudo) ----------
+# The rules must cover BOTH device states: DFU/BOOT (lsusb VID:PID) and
+# the serial firmware modes — Katapult/Klipper enumerate as USB CDC with
+# different VID:PID (e.g. 0483:5740 on STM32). Without the serial rules
+# the flash fails with 'Permission denied' (Errno 13).
 log "Installing udev rules..."
-sudo cp "$BASEDIR/udev/99-klipperizer.rules" /etc/udev/rules.d/
+sudo tee /etc/udev/rules.d/99-klipperizer.rules >/dev/null <<'EOF'
+# Klipperizer — USB access rules for flashing without sudo
+# DFU/BOOT device modes
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="2e8a", ATTRS{idProduct}=="0003", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="314b", ATTRS{idProduct}=="0106", MODE="0666"
+# STM32 USB CDC serial (Katapult/Klipper firmware running)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE="0666"
+# RP2040 USB serial (Katapult/Klipper firmware running)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2e8a", MODE="0666"
+# Generic fallback for the dedicated flashing host: any USB serial device
+SUBSYSTEM=="tty", KERNEL=="ttyACM[0-9]*", MODE="0666"
+SUBSYSTEM=="tty", KERNEL=="ttyUSB[0-9]*", MODE="0666"
+EOF
+# Belt-and-suspenders: dialout group membership (covers hosts where other
+# packages override the MODE rules). Effective on next login.
+if ! id -nG "$USER" 2>/dev/null | grep -qw dialout; then
+  log "Adding $USER to the dialout group (effective on next login)..."
+  sudo usermod -aG dialout "$USER" || true
+fi
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 

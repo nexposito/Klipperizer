@@ -6,6 +6,13 @@
 #    DFU/BOOT (STM32)→ dfu-util -R -a 0 -s 0x08000000:mass-erase:force:leave
 #    DFU/BOOT (other)→ make flash FLASH_DEVICE=<vid:pid>
 #    CAN node        → flashtool.py -i can0 -f <bin> -u <uuid>
+#  First flash runs as 4 explicit steps with delays between them:
+#    1. Board enters DFU/BOOT (shows the USB address)
+#    2. Katapult flash (explicit success/failure)
+#    3. Board re-enumeration — USB: serial device; CAN: cable swap
+#       message (disconnect USB, connect CAN-H/CAN-L) + ENTER
+#       confirmation before polling the bus for the UUID
+#    4. Klipper flash (only if step 2 succeeded)
 #  Note: Katapult renamed flash_can.py → flashtool.py; the system
 #  automatically detects which of the two exists.
 # ============================================================
@@ -55,6 +62,20 @@ query_can_uuid() {
   echo "$out" | awk 'tolower($0) ~ /uuid/ {
     for (i = 1; i <= NF; i++) if ($i ~ /^[0-9a-fA-F]{12,}$/) { print tolower($i); exit }
   }'
+}
+
+_wait_enter() {
+  # $1 = message → waits for ENTER before continuing.
+  # If stdin is not a terminal (scripted runs), falls back to a short delay
+  # so the flow never hangs waiting for input that will never come.
+  local msg="$1"
+  if [ -t 0 ]; then
+    printf "%s" "$msg"
+    read -r || sleep 5
+  else
+    warn "Non-interactive session — waiting 5s before continuing..."
+    sleep 5
+  fi
 }
 
 flash_board() {
@@ -126,38 +147,61 @@ _first_flash() {
 
   _check_modemmanager
 
-  warn "FIRST FLASH — put $name in DFU/BOOT mode now:"
+  # ---- STEP 1: board enters DFU/BOOT mode (USB connected) ----
+  warn "STEP 1/4 — put $name in DFU/BOOT mode now:"
   warn "$(yq eval '.bootloader.instructions' "$profile")"
   vp=$(wait_for_dfu "$vids" 300) \
     || fatal "No DFU/BOOT device ($vids) detected within 5 minutes."
-  success "Device detected: $vp"
+  success "Board entered DFU mode — USB address: $vp"
+  lsusb -d "$vp" 2>/dev/null | head -1 | sed 's/^/  /' || true
+  sleep 2   # let the USB device settle before claiming it
 
-  warn "Flashing Katapult via DFU/BOOT..."
+  # ---- STEP 2: flash Katapult ----
+  warn "STEP 2/4 — Flashing Katapult..."
   if [ "$method" = "dfu" ]; then
     _dfu_flash_stm32 "$katdir" "$vp" \
-      || fatal "Failed to flash Katapult via DFU. Power cycle the board (unplug USB, wait 5s, redo the BOOT sequence) and run again. If it keeps failing: 'sudo systemctl stop ModemManager', another USB cable, or connect directly to the host (no hub)."
+      || fatal "Katapult flash FAILED. Power cycle the board (unplug USB, wait 5s, redo the BOOT sequence) and run again. If it keeps failing: 'sudo systemctl stop ModemManager', another USB cable, or connect directly to the host (no hub)."
   else
     make -C "$katdir" flash FLASH_DEVICE="$vp" >/dev/null \
-      || fatal "Failed to flash Katapult via BOOT. Power cycle the board (unplug USB, wait 5s, redo the BOOT sequence) and run again."
+      || fatal "Katapult flash FAILED. Power cycle the board (unplug USB, wait 5s, redo the BOOT sequence) and run again."
   fi
+  success "Katapult flashed successfully!"
+  warn "Waiting 3s for the board to reset..."
+  sleep 3
 
-  warn "Waiting for the board to re-enumerate..."
+  # ---- STEP 3: board re-enumeration ----
   if [ "$mode" = "usb" ]; then
-    dev=$(wait_for_serial 60) || fatal "Board did not reappear after the Katapult flash."
-    warn "Flashing Klipper via Katapult USB ($dev)..."
-    "$PYTHON" "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
-      || fatal "Failed to flash Klipper via USB"
+    warn "STEP 3/4 — Waiting for the board to re-enumerate on USB..."
+    dev=$(wait_for_serial 60) \
+      || fatal "Board did not reappear after the Katapult flash."
+    success "Board detected on USB: $dev"
   else
+    warn "STEP 3/4 — Switch the board to CAN now:"
+    warn "  1. Disconnect the USB cable"
+    warn "  2. Connect CAN-H and CAN-L to the bus"
+    warn "  3. If the board was powered only via USB, connect the 24V/CAN power now"
+    _wait_enter $'\n  Press ENTER when the CAN cables are connected... '
+    warn "Searching for the CAN node on the bus..."
     uuid=""; t=0
     while [ -z "$uuid" ] && [ "$t" -lt 90 ]; do
       uuid=$(query_can_uuid "$katdir")
       [ -n "$uuid" ] || { sleep 2; t=$((t + 2)); }
     done
-    [ -n "$uuid" ] || fatal "CAN node did not show up. Check can0 (ip link show can0) and the H/L wiring."
-    warn "Flashing Klipper via Katapult CAN ($uuid)..."
-    "$PYTHON" "$ft" -i can0 -f "$kdir/out/klipper.bin" -u "$uuid" \
-      || fatal "Failed to flash Klipper via CAN"
+    [ -n "$uuid" ] || fatal "CAN node did not show up. Check can0 (ip link show can0), the H/L wiring (H→H, L→L) and the 120R jumper."
+    success "Board detected on CAN — UUID: $uuid"
   fi
+  sleep 1
+
+  # ---- STEP 4: flash Klipper ----
+  warn "STEP 4/4 — Flashing Klipper..."
+  if [ "$mode" = "usb" ]; then
+    "$PYTHON" "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
+      || fatal "Klipper flash FAILED via USB."
+  else
+    "$PYTHON" "$ft" -i can0 -f "$kdir/out/klipper.bin" -u "$uuid" \
+      || fatal "Klipper flash FAILED via CAN."
+  fi
+  success "Klipper flashed successfully!"
   success "First flash complete: $name running Klipper!"
 }
 
@@ -182,6 +226,7 @@ _flash_adapter() {
   warn "$(yq eval '.bootloader.instructions' "$profile")"
   vp=$(wait_for_dfu "$vids" 300) || fatal "DFU not detected ($vids)."
   success "Device detected: $vp — flashing..."
+  sleep 2
 
   cmd="${cmd//\\{vidpid\\}/$vp}"
   cmd="${cmd//\\{file\\}/$file}"

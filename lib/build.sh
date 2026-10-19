@@ -3,8 +3,9 @@
 #  The .config is generated from the CONFIG_* lists in the
 #  profile YAML and 'make olddefconfig' fills the rest with
 #  defaults. The symbol check below prevents silently building
-#  a wrong config: if a profile symbol does not exist in the
-#  Kconfig, the build fails listing every missing symbol.
+#  a wrong config: if a profile symbol does not survive
+#  olddefconfig, the build fails listing every missing symbol —
+#  and tells apart a wrong name from a dependency reset.
 # ============================================================
 
 generate_config() {
@@ -18,18 +19,23 @@ generate_config() {
 }
 
 verify_symbols() {
-  # $1 .config | $2 profile | $3 section | $4 mode
-  local cfg="$1" profile="$2" section="$3" mode="$4" s missing=""
+  # $1 .config | $2 profile | $3 section | $4 mode | $5 source dir (Kconfig root)
+  local cfg="$1" profile="$2" section="$3" mode="$4" srcdir="$5" s missing="" sym
   while IFS= read -r s; do
     [ -z "$s" ] && continue
     [ "$s" = "null" ] && continue
     if ! grep -q "^${s%%=*}=" "$cfg"; then
-      missing="$missing\\n  - ${s%%=*}"
+      sym="${s%%=*}"
+      if grep -rqw "config ${sym#CONFIG_}" "$srcdir/src" --include=Kconfig 2>/dev/null; then
+        missing="$missing\\n  - $sym (defined in the Kconfig but was reset — check its 'depends on' conditions)"
+      else
+        missing="$missing\\n  - $sym (not found in the Kconfig — wrong or renamed symbol)"
+      fi
     fi
   done < <({ yq eval ".${section}.common[]" "$profile" 2>/dev/null; yq eval ".${section}.${mode}[]" "$profile" 2>/dev/null; } | sed '/^null$/d; /^[[:space:]]*$/d')
   if [ -n "$missing" ]; then
     echo -e "\033[1;31m[ERROR]\033[0m Profile symbols missing from the $section Kconfig:$missing" >&2
-    fatal "Fix the YAML at: $profile — valid names in klipper/src/<family>/Kconfig and katapult/src/<family>/Kconfig"
+    fatal "Fix the YAML at: $profile — valid names in $srcdir/src/<family>/Kconfig"
   fi
 }
 
@@ -41,13 +47,13 @@ build_firmware() {
   warn "Building Katapult (interface: $mode)..."
   generate_config "$profile" katapult "$mode" "$katdir/.config"
   make -C "$katdir" olddefconfig >/dev/null
-  verify_symbols "$katdir/.config" "$profile" katapult "$mode"
+  verify_symbols "$katdir/.config" "$profile" katapult "$mode" "$katdir"
   make -C "$katdir" -j"$jobs" >/dev/null
 
   warn "Building Klipper (interface: $mode)..."
   generate_config "$profile" klipper "$mode" "$kdir/.config"
   make -C "$kdir" olddefconfig >/dev/null
-  verify_symbols "$kdir/.config" "$profile" klipper "$mode"
+  verify_symbols "$kdir/.config" "$profile" klipper "$mode" "$kdir"
   make -C "$kdir" -j"$jobs" >/dev/null
 
   success "Build done: $kdir/out/klipper.bin"

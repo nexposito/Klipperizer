@@ -30,6 +30,10 @@ bootloader:
 #   Clock Reference: hidden by default (8 MHz crystal assumed). For other
 #     crystals (e.g. 25 MHz on H7) add CONFIG_LOW_LEVEL_OPTIONS=y
 #     + CONFIG_STM32_CLOCK_REF_25M=y.
+#   Status LED (Katapult only, optional blinking indicator):
+#     CONFIG_ENABLE_LED=y + CONFIG_STATUS_LED_PIN="PA13"
+#     NOTE: renamed from ENABLE_STATUS_LED/STATUS_LED_GPIO_PIN in current
+#     Katapult — menu labels are unchanged, only the symbols changed.
 #
 # ---- RP2040/RP2350 patterns ----
 #   Architecture: CONFIG_MACH_RPXXXX=y + CONFIG_MACH_RP2040=y

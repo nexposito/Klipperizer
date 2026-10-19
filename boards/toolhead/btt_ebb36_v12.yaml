@@ -1,4 +1,5 @@
 # BTT EBB36 V1.2 — symbols and pins verified against the official BTT EBB README
+# Katapult LED symbols renamed upstream: ENABLE_LED / STATUS_LED_PIN (verified in katapult master src/Kconfig)
 name: "BTT EBB36 V1.2"
 category: toolhead
 mcu: STM32G0B1
@@ -16,8 +17,8 @@ katapult:
     - "CONFIG_LOW_LEVEL_OPTIONS=y"
     - "CONFIG_STM32_FLASH_START_2000=y"
     - "CONFIG_STM32_APP_START_2000=y"
-    - "CONFIG_ENABLE_STATUS_LED=y"
-    - 'CONFIG_STATUS_LED_GPIO_PIN="PA13"'
+    - "CONFIG_ENABLE_LED=y"
+    - 'CONFIG_STATUS_LED_PIN="PA13"'
   can:
     - "CONFIG_STM32_MMENU_CANBUS_PB0_PB1=y"
   usb:

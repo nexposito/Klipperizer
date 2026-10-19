@@ -1,4 +1,5 @@
 # BTT EBB42 Gen2 — reference: canbus.esoterical.online (Common Toolhead Hardware)
+# Katapult LED symbols renamed upstream: ENABLE_LED / STATUS_LED_PIN (verified in katapult master src/Kconfig)
 name: "BTT EBB42 Gen2"
 category: toolhead
 mcu: STM32G0B1
@@ -16,8 +17,8 @@ katapult:
     - "CONFIG_LOW_LEVEL_OPTIONS=y"
     - "CONFIG_STM32_FLASH_START_2000=y"
     - "CONFIG_STM32_APP_START_2000=y"
-    - "CONFIG_ENABLE_STATUS_LED=y"
-    - 'CONFIG_STATUS_LED_GPIO_PIN="PA13"'   # VERIFY pin on the guide
+    - "CONFIG_ENABLE_LED=y"
+    - 'CONFIG_STATUS_LED_PIN="PA13"'   # VERIFY pin on the guide
   can:
     - "CONFIG_STM32_MMENU_CANBUS_PB0_PB1=y"   # VERIFY pins
   usb:

@@ -12,6 +12,11 @@
 #  scan, name or udev identity) or via the CAN bus (UUID query, only
 #  if can0 exists). If found, the Katapult flash is skipped.
 #
+#  CAN mode requires the can0 interface: flash_board warns early when
+#  can0 does not exist (adapter unplugged or not configured) instead of
+#  silently waiting for a node that cannot appear. install.sh sets up
+#  can0 following the Esoterical guide (systemd-networkd + udev rule).
+#
 #  First flash (no Katapult found) runs as 4 explicit steps:
 #    1. Board enters DFU/BOOT (shows the USB address) — the wait ALSO
 #       watches /dev/serial/by-id/* for an already-installed Katapult
@@ -69,6 +74,15 @@ _check_modemmanager() {
      systemctl is-active ModemManager >/dev/null 2>&1; then
     warn "ModemManager is active — it can hijack DFU flashing and cause 'Error during download get_status'."
     warn "Disable it now with: sudo systemctl stop ModemManager"
+  fi
+}
+
+_check_can0() {
+  # Warns early when CAN mode is chosen but can0 does not exist (adapter
+  # unplugged or interface not configured). install.sh sets up can0.
+  if ! ip link show can0 >/dev/null 2>&1; then
+    warn "can0 interface not found — plug the USB-CAN adapter in and re-run 'bash install.sh' to configure it."
+    warn "CAN node discovery will fail until can0 is up (check with: ip link show can0)."
   fi
 }
 
@@ -192,6 +206,9 @@ flash_board() {
     _flash_adapter "$profile"
     return
   fi
+
+  # CAN mode needs the can0 interface up — warn early if it is missing
+  [ "$mode" = "can" ] && _check_can0
 
   # ---- PRE-CHECK: is Katapult already installed? ----
   warn "Checking if Katapult is already installed on $name..."

@@ -3,7 +3,8 @@
 #  Klipperizer — Installer
 #  Usage: bash install.sh
 #  Installs dependencies, clones Klipper and Katapult, sets up
-#  udev rules, the executable bit and the global command.
+#  udev rules, the CAN interface (can0), the executable bit and
+#  the global command.
 # ============================================================
 set -euo pipefail
 
@@ -124,7 +125,51 @@ if command -v systemctl >/dev/null 2>&1 && \
   sudo systemctl disable ModemManager
 fi
 
-# ---------- 7. Global command ----------
+# ---------- 7. CAN interface (can0) — Esoterical guide method ----------
+# Follows the CURRENT Esoterical CANBus guide: systemd-networkd manages
+# the can* interfaces (ifupdown/interfaces.d is being phased out), a udev
+# rule sets txqueuelen=128 (Klipper docs recommendation) and a .network
+# file sets the bus speed to 1 Mbit. An existing 25-can.network is kept.
+sudo modprobe gs_usb 2>/dev/null || true   # driver for USB-CAN adapters
+
+if command -v systemctl >/dev/null 2>&1; then
+  log "Enabling systemd-networkd (manages the CAN interfaces)..."
+  sudo systemctl unmask systemd-networkd 2>/dev/null || true
+  sudo systemctl enable systemd-networkd
+  sudo systemctl start systemd-networkd \
+    || log "Warning: systemd-networkd did not start — check 'systemctl status systemd-networkd'."
+  # wait-online can freeze the boot for ~2 min waiting for CAN — disable it
+  sudo systemctl disable systemd-networkd-wait-online.service 2>/dev/null || true
+
+  log "Creating the CAN udev rule (txqueuelen 128)..."
+  echo -e 'SUBSYSTEM=="net", ACTION=="change|add", KERNEL=="can*"  ATTR{tx_queue_len}="128"' \
+    | sudo tee /etc/udev/rules.d/10-can.rules >/dev/null
+
+  if sudo test -f /etc/systemd/network/25-can.network; then
+    log "CAN network config already exists (/etc/systemd/network/25-can.network) — keeping it."
+  else
+    log "Creating CAN network config (/etc/systemd/network/25-can.network, 1 Mbit)..."
+    echo -e "[Match] \n Name=can* \n\n [CAN] \n BitRate=1M \n\n [Link] \n RequiredForOnline=no" \
+      | sudo tee /etc/systemd/network/25-can.network >/dev/null
+  fi
+  sudo udevadm control --reload-rules 2>/dev/null || true
+
+  if ip link show can0 >/dev/null 2>&1; then
+    log "CAN adapter detected — bringing can0 up at 1 Mbit..."
+    sudo ip link set can0 down 2>/dev/null || true
+    sudo ip link set can0 type can bitrate 1000000
+    sudo ip link set can0 txqueuelen 128
+    sudo ip link set can0 up
+    ip -details link show can0 | sed 's/^/  /' || true
+  else
+    log "No CAN adapter plugged in yet — can0 will come up automatically when you connect it."
+    log "A reboot is recommended so systemd-networkd reads the new config files."
+  fi
+else
+  log "systemctl not available — skipping the CAN interface setup."
+fi
+
+# ---------- 8. Global command ----------
 sudo ln -sf "$BASEDIR/klipperizer" /usr/local/bin/klipperizer
 
 log "Installation complete!"

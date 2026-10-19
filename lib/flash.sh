@@ -8,12 +8,14 @@
 #    CAN node        → flashtool.py -i can0 -f <bin> -u <uuid>
 #
 #  PRE-CHECK: before any Katapult flash, the tool tests whether
-#  Katapult is already installed — via USB serial (usb-Katapult_*)
-#  or via the CAN bus (UUID query, only if can0 exists). If found,
-#  the Katapult flash is skipped and only Klipper is flashed.
+#  Katapult is already installed — via USB serial (/dev/serial/by-id/*
+#  scan, name or udev identity) or via the CAN bus (UUID query, only
+#  if can0 exists). If found, the Katapult flash is skipped.
 #
 #  First flash (no Katapult found) runs as 4 explicit steps:
-#    1. Board enters DFU/BOOT (shows the USB address)
+#    1. Board enters DFU/BOOT (shows the USB address) — the wait ALSO
+#       watches /dev/serial/by-id/* for an already-installed Katapult
+#       and skips the Katapult flash the moment it appears
 #    2. Katapult flash (explicit success/failure)
 #    3. Board re-enumeration — USB: serial device; CAN: cable swap
 #       message (disconnect USB, connect CAN-H/CAN-L) + ENTER
@@ -131,6 +133,31 @@ _switch_to_can_prompt() {
   warn "Searching for the CAN node on the bus..."
 }
 
+_wait_dfu_or_katapult() {
+  # $1 = VID:PID list | $2 = timeout (s)
+  # Watches DFU (lsusb) and Katapult serial (/dev/serial/by-id/*) at the
+  # same time; echoes "dfu <vid:pid>" or "katapult <serial>" for whichever
+  # appears first. A board that already runs Katapult never enters DFU,
+  # so watching both is what makes the skip possible.
+  local vids="$1" timeout="${2:-300}" t=0 vp dev
+  while [ "$t" -lt "$timeout" ]; do
+    dev=$(detect_katapult_serial)
+    if [ -n "$dev" ]; then
+      echo "katapult $dev"
+      return 0
+    fi
+    for vp in $vids; do
+      if lsusb -d "$vp" 2>/dev/null | grep -q .; then
+        echo "dfu $vp"
+        return 0
+      fi
+    done
+    sleep 1
+    t=$((t + 1))
+  done
+  return 1
+}
+
 flash_board() {
   local profile="$1" mode="$2" kdir="$3" katdir="$4"
   local name ft dev uuid
@@ -145,7 +172,7 @@ flash_board() {
   # ---- PRE-CHECK: is Katapult already installed? ----
   warn "Checking if Katapult is already installed on $name..."
 
-  # 1) Katapult on USB serial?
+  # 1) Katapult on USB serial? (scans /dev/serial/by-id/*)
   dev=$(detect_katapult_serial)
   if [ -n "$dev" ]; then
     success "Katapult already installed (detected via USB: $dev) — skipping the Katapult flash."
@@ -237,7 +264,7 @@ _flash_can() {
 
 _first_flash() {
   local profile="$1" mode="$2" kdir="$3" katdir="$4"
-  local name vids vp uuid t dev ft method
+  local name vids vp uuid t dev ft method state
   name=$(yq eval '.name' "$profile")
   ft=$(_flashtool_path "$katdir")
   method=$(yq eval '.bootloader.method' "$profile")
@@ -246,11 +273,34 @@ _first_flash() {
 
   _check_modemmanager
 
-  # ---- STEP 1: board enters DFU/BOOT mode (USB connected) ----
+  # ---- STEP 1: board enters DFU/BOOT — or Katapult is already there ----
   warn "STEP 1/4 — put $name in DFU/BOOT mode now:"
   warn "$(yq eval '.bootloader.instructions' "$profile")"
-  vp=$(wait_for_dfu "$vids" 300) \
+  warn "  (If the board already runs Katapult, it will be detected automatically)"
+  state=$(_wait_dfu_or_katapult "$vids" 300) \
     || fatal "No DFU/BOOT device ($vids) detected within 5 minutes."
+
+  if [ "${state%% *}" = "katapult" ]; then
+    dev="${state#* }"
+    success "Katapult already installed (detected via USB: $dev) — skipping the Katapult flash."
+    warn "Flashing the $mode-configured Klipper via Katapult USB..."
+    "$PYTHON" "$ft" -f "$kdir/out/klipper.bin" -d "$dev" \
+      || fatal "Klipper flash FAILED via USB."
+    success "Klipper flashed successfully!"
+    if [ "$mode" = "can" ]; then
+      warn "Waiting 3s for the board to reset..."
+      sleep 3
+      _switch_to_can_prompt
+      uuid=$(_wait_can_node "$katdir")
+      [ -n "$uuid" ] || fatal "CAN node did not show up. Check can0 (ip link show can0), the H/L wiring (H→H, L→L) and the 120R jumper."
+      success "Board is ready on CAN!"
+    else
+      success "$name is running Klipper!"
+    fi
+    return
+  fi
+
+  vp="${state#* }"
   success "Board entered DFU mode — USB address: $vp"
   lsusb -d "$vp" 2>/dev/null | head -1 | sed 's/^/  /' || true
   sleep 2   # let the USB device settle before claiming it
